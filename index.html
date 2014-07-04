@@ -1,7 +1,23 @@
 <!DOCTYPE html>
 <html>
+<head>
+<script src="js/coliru" type="script/javascript"/>
+<script type="script/javascript">
+function compile() {
+    var result = document.getElementById("result");
+	var src = document.getElementById("source");
+	result.innerHTML = escape(compile(src.value));
+}
+</script>
+</head>
 <body>
 <h1>Hello World</h1>
-<p>I'm hosted with GitHub Pages.</p>
+<textarea rows="3" cols="50" id="source">Main() {
+    std.cout << "Hello, World!";
+}
+</textarea>
+<button onclick="compile()">Compile</button>
+<p id="result"/> 
+
 </body>
 </html>
