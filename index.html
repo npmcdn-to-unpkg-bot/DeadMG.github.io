@@ -1,6 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-35434966-2']);
+        _gaq.push(['_trackPageview']);
+        
+        (function () {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+    <title>Coding Puppy</title>
 <script type="text/javascript">
 function escapeRegExp(string) {
     return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
@@ -37,12 +52,15 @@ function compile() {
 		        nestedhttp.onreadystatechange = function() {
                     if (nestedhttp.readyState == 4) {
                         if (nestedhttp.status == 200) {
-						    enableUI(true);    
-                            document.getElementById('result').innerHTML = escapeHTML(replaceAll("'x86_64' is not a recognized processor for this target (ignoring processor)", "", nestedhttp.responseText).trim());
+						    enableUI(true);
+							var output = escapeHTML(replaceAll("'x86_64' is not a recognized processor for this target (ignoring processor)", "", nestedhttp.responseText).trim());
+							var rows = output.split("\n").length;
+                            document.getElementById('result').value = output;
+							document.getElementById('result').rows = rows > 5 ? 5 : rows;
 		            	}
 		        	}
 	            }
-                nestedhttp.send(JSON.stringify({ "cmd": "/usr/local/bin/Wide/CLI main.cpp && g++ a.o && ./a.out", "src": using + widesrc }));		
+                nestedhttp.send(JSON.stringify({ "cmd": "/usr/local/bin/Wide/CLI main.cpp && g++ a.o && ./a.out", "src": widesrc + using }));		
 		    }
 		}
 	}
@@ -51,15 +69,26 @@ function compile() {
 </script>
 </head>
 <body>
-<h1>Hello World</h1>
-<textarea rows="3" cols="50" id="WideSource" autocomplete=false>Main() {
+    <div class="container-fluid">
+	    <div class="input-group">
+	        <div class="row">
+                <div class="col-md-6"><span class="input-group-addon">Wide</span><textarea class="form-control" rows="3" cols="50" id="WideSource" autocomplete=false>Main() {
     cplusplus.std.cout << "Hello, World!";
-}
-</textarea>
-<textarea rows="3" cols="50" id="CPPSource" autocomplete=false>#include <iostream>
-</textarea>
-<button onclick="compile()" id="compile">Compile</button>
-<p id="result"></p> 
+}</textarea>
+				</div>
+                <div class="col-md-6"><span class="input-group-addon">C++</span><textarea class="form-control" rows="3" cols="50" id="CPPSource" autocomplete=false>#include <iostream></textarea></div>
+            </div>
+		    <div class="row">
+					    <div class="col-md-1">
+                            <span class="input-group-btn"><button class="btn btn-default" type="button" onclick="compile()" id="compile">Compile</button></span>
+					    </div>
+						<div class="col-md-11">
+						    <textarea class="form-control" rows="1" cols="50" id="result" autocomplete=false readOnly=true></textarea>
+						</div>
+			</div>
+		    </div>
+		</div>
+    </div>
 <a href="http://coliru.stacked-crooked.com">Compilation services provided by Coliru.</a>
 </body>
 </html>
