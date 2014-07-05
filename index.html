@@ -1,23 +1,65 @@
 <!DOCTYPE html>
 <html>
 <head>
-<script src="js/coliru" type="script/javascript"/>
-<script type="script/javascript">
+<script type="text/javascript">
+function escapeRegExp(string) {
+    return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+}
+function replaceAll(find, replace, str) {
+  return str.replace(new RegExp(escapeRegExp(find), 'g'), replace);
+}
+// http://stackoverflow.com/questions/5251520/how-do-i-escape-some-html-in-javascript
+function escapeHTML( string )
+{
+    var pre = document.createElement('pre');
+    var text = document.createTextNode( string );
+    pre.appendChild(text);
+    return pre.innerHTML;
+}
+function enableUI(val) {
+    document.getElementById("compile").disabled = !val;
+	document.getElementById("WideSource").readOnly = !val;
+	document.getElementById("CPPSource").readOnly = !val;
+}
 function compile() {
-    var result = document.getElementById("result");
-	var src = document.getElementById("source");
-	result.innerHTML = escape(compile(src.value));
+    enableUI(false);
+    var http = new XMLHttpRequest();
+	var widesrc = document.getElementById('WideSource').value;
+	var cppsrc = document.getElementById('CPPSource').value;
+    http.open("POST", "http://coliru.stacked-crooked.com/share", true);
+	http.onreadystatechange = function() {
+        if (http.readyState == 4) {
+            if (http.status == 200) {
+                var location = "/Archive2/" + http.responseText.substr(0, 2) + "/" + http.responseText.substr(2, http.responseText.length).trim() + "/main.cpp";
+              	var using = 'using cplusplus := cpp("' + location + '");\n';
+		        var nestedhttp = new XMLHttpRequest();
+                nestedhttp.open("POST", "http://coliru.stacked-crooked.com/compile", true);
+		        nestedhttp.onreadystatechange = function() {
+                    if (nestedhttp.readyState == 4) {
+                        if (nestedhttp.status == 200) {
+						    enableUI(true);    
+                            document.getElementById('result').innerHTML = escapeHTML(replaceAll("'x86_64' is not a recognized processor for this target (ignoring processor)", "", nestedhttp.responseText).trim());
+		            	}
+		        	}
+	            }
+                nestedhttp.send(JSON.stringify({ "cmd": "/usr/local/bin/Wide/CLI main.cpp && g++ a.o && ./a.out", "src": using + widesrc }));		
+		    }
+		}
+	}
+    http.send(JSON.stringify({ "cmd": "", "src": cppsrc }));
 }
 </script>
 </head>
 <body>
 <h1>Hello World</h1>
-<textarea rows="3" cols="50" id="source">Main() {
-    std.cout << "Hello, World!";
+<textarea rows="3" cols="50" id="WideSource" autocomplete=false>Main() {
+    cplusplus.std.cout << "Hello, World!";
 }
 </textarea>
-<button onclick="compile()">Compile</button>
-<p id="result"/> 
-
+<textarea rows="3" cols="50" id="CPPSource" autocomplete=false>#include <iostream>
+</textarea>
+<button onclick="compile()" id="compile">Compile</button>
+<p id="result"></p> 
+<a href="http://coliru.stacked-crooked.com">Compilation services provided by Coliru.</a>
 </body>
 </html>
