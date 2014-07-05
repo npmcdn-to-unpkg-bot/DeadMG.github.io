@@ -46,7 +46,7 @@ function compile() {
         if (http.readyState == 4) {
             if (http.status == 200) {
                 var location = "/Archive2/" + http.responseText.substr(0, 2) + "/" + http.responseText.substr(2, http.responseText.length).trim() + "/main.cpp";
-              	var using = 'using cplusplus := cpp("' + location + '");\n';
+              	var using = 'using cplusplus := cpp("' + location + '");';
 		        var nestedhttp = new XMLHttpRequest();
                 nestedhttp.open("POST", "http://coliru.stacked-crooked.com/compile", true);
 		        nestedhttp.onreadystatechange = function() {
@@ -66,17 +66,19 @@ function compile() {
 	}
     http.send(JSON.stringify({ "cmd": "", "src": cppsrc }));
 }
+$(function() {
+    document.getElementById('WideSource').value = 'Main() {\n    cplusplus.std.cout << "Hello, World!";\n}';
+    document.getElementById('CPPSource').value = '#include <iostream>';
+});
 </script>
 </head>
 <body>
-    <div class="container-fluid">
+    <div class="container">
 	    <div class="input-group">
 	        <div class="row">
-                <div class="col-md-6"><span class="input-group-addon">Wide</span><textarea class="form-control" rows="3" cols="50" id="WideSource" autocomplete=false>Main() {
-    cplusplus.std.cout << "Hello, World!";
-}</textarea>
+                <div class="col-md-6"><span class="input-group-addon">Wide</span><textarea class="form-control" rows="3" cols="50" id="WideSource" autocomplete=false></textarea>
 				</div>
-                <div class="col-md-6"><span class="input-group-addon">C++</span><textarea class="form-control" rows="3" cols="50" id="CPPSource" autocomplete=false>#include <iostream></textarea></div>
+                <div class="col-md-6"><span class="input-group-addon">C++</span><textarea class="form-control" rows="3" cols="50" id="CPPSource" autocomplete=false></textarea></div>
             </div>
 		    <div class="row">
 					    <div class="col-md-1">
@@ -86,7 +88,6 @@ function compile() {
 						    <textarea class="form-control" rows="1" cols="50" id="result" autocomplete=false readOnly=true></textarea>
 						</div>
 			</div>
-		    </div>
 		</div>
     </div>
 <a href="http://coliru.stacked-crooked.com">Compilation services provided by Coliru.</a>
