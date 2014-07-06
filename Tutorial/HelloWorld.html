@@ -2,6 +2,14 @@
 <html>
 <head>
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+	<link rel="stylesheet" href="http://codepuppy.co.uk/css/codemirror.css">
+    <script src="http://codepuppy.co.uk/js/codemirror.js"></script>
+    <script src="http://codepuppy.co.uk/js/clike.js"></script>
+    <script>
+    var editor = CodeMirror.fromTextArea(document.getElementById('CPPSource'), {
+        mode: "text/c++"
+    });
+    </script>
     <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
     <script type="text/javascript">
