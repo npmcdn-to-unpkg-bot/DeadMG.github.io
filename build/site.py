@@ -1,6 +1,7 @@
 import os
 from os import listdir
 from os.path import isfile, join
+from urllib.parse import urljoin
 
 def files(mypath):
     return [ f for f in listdir(mypath) if isfile(join(mypath,f)) ]
@@ -29,11 +30,11 @@ def header(path, result_path):
         base = "../"
         index = "index.html"
         currdir = ""
-        getcurdir = lambda: os.path.normpath(os.path.relpath(os.path.join(base, currdir, index), os.path.dirname(result_path)))
+        getcurdir = lambda: os.path.normpath(os.path.relpath(urljoin(base, currdir, index), os.path.dirname(result_path)))
         start += '<ol class="breadcrumb">'
         start += '<li><a href="' + getcurdir() + '">Home</a></li>'
         for dir in dirs:
-            currdir = os.path.join(currdir, dir)
+            currdir = urljoin(currdir, dir)
             start += '<li><a href="' + getcurdir() + '">' + dir + '</a></li>'
         root, ext = os.path.splitext(os.path.basename(path))
         start += '<li class="active">' + root + '</li></ol>'
