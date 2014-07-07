@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+	<link rel="stylesheet" href="http://codepuppy.co.uk/css/codemirror.css">
+    <script src="http://codepuppy.co.uk/js/codemirror.js"></script>
+    <script src="http://codepuppy.co.uk/js/clike.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <title>Coding Puppy</title>
+<script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-35434966-2']);
+        _gaq.push(['_trackPageview']);
+        
+        (function () {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+</head>
+<body>
+    <div class="jumbotron">
+        <div class="container">
+            <h1>Aggregate Type</h1>
+        </div>
+	</div>
+    <div class="container">
+	<div class="col-12-md">
+	<p>An aggregate type is a classification of types in the Wide type system. Aggregate types have properties based on the properties of their members. Most aggregate types add or change some behaviours.</p>
+	<ul>
+	<li>Aggregate types have a public [trivial] copy constructor if there is no member without a visible [trivial] copy constructor.</li>
+	<li>Aggregate types have a public [trivial] move constructor if there is no member without a visible [trivial] move constructor.</li>
+	<li>Aggregate types have a public [trivial] copy assignment operator if there is no member without a visible [trivial] copy assignment operator.</li>	
+	<li>Aggregate types have a public [trivial] move assignment operator if there is no member without a visible [trivial] move assignment operator.</li>
+	<li>Aggregate types have a public [trivial] default constructor if there is no member without a visible [trivial] default constructor.</li>
+	<li>Aggregate types are constant if they have no non-constant members.</li>
+	<li>Aggregate types are empty if they have no non-empty members.</li>
+	<li>The destructor of an aggregate type destroys all members in reverse order. It is non-trivial if any member's destructor is non-trivial.</li>
+	</ul>
+	<p>User defined types, arrays, tuples, lambdas, and overload sets are all aggregate types.</p>
+	</div>
+	</div>
+	<footer>&copy; Puppy 2014<a href="http://coliru.stacked-crooked.com">Compilation services provided by Coliru.</a></footer>
+</body>
+</html>
