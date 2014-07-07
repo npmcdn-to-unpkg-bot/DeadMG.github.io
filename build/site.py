@@ -29,7 +29,7 @@ def header(path, result_path):
         base = "../"
         index = "index.html"
         currdir = ""
-        getcurdir = lambda: os.path.relpath(os.path.join(base, currdir, index), os.path.dirname(result_path))
+        getcurdir = lambda: os.path.normpath(os.path.relpath(os.path.join(base, currdir, index), os.path.dirname(result_path)))
         start += '<ol class="breadcrumb">'
         start += '<li><a href="' + getcurdir() + '">Home</a></li>'
         for dir in dirs:
