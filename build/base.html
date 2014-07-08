@@ -1,0 +1,66 @@
+<%!
+import os
+from urllib.parse import urljoin
+def splitall(path):
+    allparts = []
+    while 1:
+        parts = os.path.split(path)
+        if parts[0] == path:  # sentinel for absolute paths
+            allparts.insert(0, parts[0])
+            break
+        elif parts[1] == path: # sentinel for relative paths
+            allparts.insert(0, parts[1])
+            break
+        else:
+            path = parts[0]
+            allparts.insert(0, parts[1])
+    return allparts
+def create_breadcrumbs(path, result_path, name):
+    start = ''
+    dirs = splitall(path)
+    dirs.pop()
+    dirs.pop(0)
+    if (len(dirs) > 0):
+        base = "../"
+        index = "index.html"
+        currdir = ""
+        getcurdir = lambda: os.path.normpath(os.path.relpath(urljoin(base, currdir, index), os.path.dirname(result_path)))
+        start += '<nav class="navbar navbar-inverse" style="margin-bottom: 0;" role="navigation"><div class="container"style="padding:0px;"><p class="navbar-text navbar-left"><a class="navbar-link" href="' + getcurdir() + '">Home</a></p>'
+        for dir in dirs:
+            currdir = urljoin(currdir, dir)
+            start += '<p class="navbar-text navbar-left"><a class="navbar-link" href="' + getcurdir() + '">' + dir + '</a></p>'
+        if not 'name' in locals():
+            root, ext = os.path.splitext(os.path.basename(path))        
+            name = root
+        start += '<p class="navbar-text navbar-left">' + name + '</p></div></nav>'
+    return start
+%>
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-35434966-2']);
+        _gaq.push(['_trackPageview']);
+        
+        (function () {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+    <%block name="header"/>
+</head>
+<body>
+    ${create_breadcrumbs(path, result_path, name)}
+    ${next.body()}
+    <div class="container">
+        <div class="row">	
+	        <footer>&copy; Puppy 2014 <a href="http://coliru.stacked-crooked.com">Compilation services provided by Coliru.</a></footer>
+	    </div>
+	</div>
+</body>
+</html>

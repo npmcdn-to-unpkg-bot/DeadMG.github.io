@@ -1,122 +1,141 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
-    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-    <script type="text/javascript">
-        var _gaq = _gaq || [];
-        _gaq.push(['_setAccount', 'UA-35434966-2']);
-        _gaq.push(['_trackPageview']);
-        
-        (function () {
-            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-        })();
-    </script><ol class="breadcrumb"><li><a href="..">Home</a></li><li><a href=".">Tutorial</a></li><li class="active">HelloWorld</li></ol><script type="text/javascript">
-        var _gaq = _gaq || [];
-        _gaq.push(['_setAccount', 'UA-35434966-2']);
-        _gaq.push(['_trackPageview']);
-        
-        (function () {
-            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-        })();
-function escapeRegExp(string) {
-    return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
-}
-function replaceAll(find, replace, str) {
-  return str.replace(new RegExp(escapeRegExp(find), 'g'), replace);
-}
-// http://stackoverflow.com/questions/5251520/how-do-i-escape-some-html-in-javascript
-function escapeHTML( string )
-{
-    var pre = document.createElement('pre');
-    var text = document.createTextNode( string );
-    pre.appendChild(text);
-    return pre.innerHTML;
-}
-function enableUI(val) {
-    document.getElementById("compile").disabled = !val;
-	document.getElementById("WideSource").readOnly = !val;
-	document.getElementById("CPPSource").readOnly = !val;
-}
-function compile() {
-    enableUI(false);
-    var http = new XMLHttpRequest();
-	var widesrc = document.getElementById('WideSource').value;
-	var cppsrc = document.getElementById('CPPSource').value;
-    http.open("POST", "http://coliru.stacked-crooked.com/share", true);
-	http.onreadystatechange = function() {
-        if (http.readyState == 4) {
-            if (http.status == 200) {
-                var location = "/Archive2/" + http.responseText.substr(0, 2) + "/" + http.responseText.substr(2, http.responseText.length).trim() + "/main.cpp";
-              	var using = 'using cplusplus := cpp("' + location + '");';
-		        var nestedhttp = new XMLHttpRequest();
-                nestedhttp.open("POST", "http://coliru.stacked-crooked.com/compile", true);
-		        nestedhttp.onreadystatechange = function() {
-                    if (nestedhttp.readyState == 4) {
-                        if (nestedhttp.status == 200) {
-						    enableUI(true);
-							var output = escapeHTML(replaceAll("'x86_64' is not a recognized processor for this target (ignoring processor)", "", nestedhttp.responseText).trim());
-							var rows = output.split("\n").length;
-                            document.getElementById('result').value = output;
-							document.getElementById('result').rows = rows > 5 ? 5 : rows;
-		            	}
-		        	}
-	            }
-                nestedhttp.send(JSON.stringify({ "cmd": "/usr/local/bin/Wide/CLI main.cpp && g++ a.o && ./a.out", "src": widesrc + using }));		
-		    }
-		}
-	}
-    http.send(JSON.stringify({ "cmd": "", "src": cppsrc }));
-}
-$(function() {
-	document.getElementById('CPPSource').value = '#include <iostream>';
-    document.getElementById('WideSource').value = 'Main() {\n    cplusplus.std.cout << "Hello, World!";\n}';
-});
-</script>
-</head>
-<body>
-    <div class="jumbotron">
-        <div class="container">
-            <h1>Hello, world!</h1>
-        </div>
-	</div>
-    <div class="container" style="padding:0px">
-	    <div class="form-group">
-	        <div class="row">
-                <div class="col-md-6"><div class="input-group"><span class="input-group-addon">Wide</span><textarea class="form-control" rows="3" id="WideSource" autocomplete=false></textarea></div></div>
-                <div class="col-md-6"><div class="input-group"><span class="input-group-addon">C++</span><textarea class="form-control" rows="3" id="CPPSource" autocomplete=false></textarea></div></div>
-            </div>
-			<br>
-		    <div class="row">
-			    <div class="col-md-12">
-			        <div class="input-group">
-                        <span class="input-group-btn"><button class="btn btn-primary" type="button" onclick="compile()" id="compile">Compile</button></span>			    	
-				        <textarea class="form-control" id="result" rows="1" autocomplete=false readOnly=true></textarea>				    
-			     	</div>
-				</div>
-			</div>
-		</div>
-        <div class="row">
-		    <div class="col-md-12">
-	            <p>The Main function defines the code invoked at the beginning of every Wide program. Since Wide does not yet have its own Standard library for I/O, we will simply invoke C++'s.<br>
-	            The cplusplus identifier provided by the web interface is a C++ namespace- the global namespace of the C++ code on the right.<br>
-	            When we access a member of a namspace, this refers to the corresponding member of that namespace in that translation unit.<br>
-	            Once we have looked up ::std::cout,	then we can use the << operator, just as in C++.</p>
-				<p>Interoperating with C++ is both a core motivation for Wide's existence and a key skill in the early stages. We'll take a look at Wide's other C++ interoperation features next.</p>
-			</div>
-        </div>
-	</div>
-
-<div class="container">
-    <div class="row">
-	
-	<footer>&copy; Puppy 2014<a href="http://coliru.stacked-crooked.com">Compilation services provided by Coliru.</a></footer>
-	</div>
-	</div>
-</body>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-35434966-2']);
+        _gaq.push(['_trackPageview']);
+        
+        (function () {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+    
+<script type="text/javascript">
+function escapeRegExp(string) {
+    return string.replace(/([.*+?^=!:()|\[\]\/\\])/g, "\\$1");
+}
+function replaceAll(find, replace, str) {
+  return str.replace(new RegExp(escapeRegExp(find), 'g'), replace);
+}
+// http://stackoverflow.com/questions/5251520/how-do-i-escape-some-html-in-javascript
+function escapeHTML( string )
+{
+    var pre = document.createElement('pre');
+    var text = document.createTextNode( string );
+    pre.appendChild(text);
+    return pre.innerHTML;
+}
+function enableUI(val) {
+    document.getElementById("compile").disabled = !val;
+	document.getElementById("WideSource").readOnly = !val;
+	document.getElementById("CPPSource").readOnly = !val;
+}
+function compile() {
+    enableUI(false);
+    var http = new XMLHttpRequest();
+	var widesrc = document.getElementById('WideSource').value;
+	var cppsrc = document.getElementById('CPPSource').value;
+    http.open("POST", "http://coliru.stacked-crooked.com/share", true);
+	http.onreadystatechange = function() {
+        if (http.readyState == 4) {
+            if (http.status == 200) {
+                var location = "/Archive2/" + http.responseText.substr(0, 2) + "/" + http.responseText.substr(2, http.responseText.length).trim() + "/main.cpp";
+              	var using = 'using cplusplus := cpp("' + location + '");';
+		        var nestedhttp = new XMLHttpRequest();
+                nestedhttp.open("POST", "http://coliru.stacked-crooked.com/compile", true);
+		        nestedhttp.onreadystatechange = function() {
+                    if (nestedhttp.readyState == 4) {
+                        if (nestedhttp.status == 200) {
+						    enableUI(true);
+							var output = escapeHTML(replaceAll("'x86_64' is not a recognized processor for this target (ignoring processor)", "", nestedhttp.responseText).trim());
+							var rows = output.split("\n").length;
+                            document.getElementById('result').value = output;
+							document.getElementById('result').rows = rows > 5 ? 5 : rows;
+		            	}
+		        	}
+	            }
+                nestedhttp.send(JSON.stringify({ "cmd": "/usr/local/bin/Wide/CLI main.cpp && g++ a.o && ./a.out", "src": widesrc + using }));		
+		    }
+		}
+	}
+    http.send(JSON.stringify({ "cmd": "", "src": cppsrc }));
+}
+</script>
+<title>Hello World!</title>
+
+<script type="text/javascript">
+$(function() {
+	document.getElementById('CPPSource').value = '#include <iostream>';
+    document.getElementById('WideSource').value = 'Main() {\n    cplusplus.std.cout << "Hello, World!";\n}';
+});
+</script>
+
+
+</head>
+<body>
+    <nav class="navbar navbar-inverse" style="margin-bottom: 0;" role="navigation"><div class="container"style="padding:0px;"><p class="navbar-text navbar-left"><a class="navbar-link" href="..">Home</a></p><p class="navbar-text navbar-left"><a class="navbar-link" href=".">Tutorial</a></p><p class="navbar-text navbar-left">Hello World!</p></div></nav>
+    
+
+
+<div class="jumbotron">
+    <div class="container">
+        
+    <h1>Hello World!</h1>
+
+    </div>
+</div>
+<div class="container" style="padding:0px;">
+    <div class="row">      
+        <div class="col-md-10">
+            
+
+
+<div class="form-group">
+    <div class="row">
+        <div class="col-md-6"><div class="input-group"><span class="input-group-addon">Wide</span><textarea class="form-control" rows="3" id="WideSource" autocomplete=false></textarea></div></div>
+        <div class="col-md-6"><div class="input-group"><span class="input-group-addon">C++</span><textarea class="form-control" rows="3" id="CPPSource" autocomplete=false></textarea></div></div>
+    </div>
+	<br>
+    <div class="row">
+	    <div class="col-md-12">
+	        <div class="input-group">
+                <span class="input-group-btn"><button class="btn btn-primary" type="button" onclick="compile()" id="compile">Compile</button></span>			    	
+		        <textarea class="form-control" id="result" rows="1" autocomplete=false readOnly=true></textarea>				    
+	     	</div>
+		</div>
+	</div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <p>The Main function defines the code invoked at the beginning of every Wide program. Since Wide does not yet have its own Standard library for I/O, we will simply invoke C++'s.<br>
+        The cplusplus identifier provided by the web interface is a C++ namespace- the global namespace of the C++ code on the right.<br>
+        When we access a member of a namspace, this refers to the corresponding member of that namespace in that translation unit.<br>
+        Once we have looked up ::std::cout,	then we can use the << operator, just as in C++.</p>
+		<p>Interoperating with C++ is both a core motivation for Wide's existence and a key skill in the early stages. We'll take a look at Wide's other C++ interoperation features next.</p>
+	</div>
+</div>
+
+        </div>
+        
+        <div class="col-md-2">
+            <ul class="nav">
+                    <li><a href="HelloWorld.html">Hello World!</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+    <div class="container">
+        <div class="row">	
+	        <footer>&copy; Puppy 2014 <a href="http://coliru.stacked-crooked.com">Compilation services provided by Coliru.</a></footer>
+	    </div>
+	</div>
+</body>
 </html>
