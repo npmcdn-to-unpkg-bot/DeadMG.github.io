@@ -1,0 +1,11 @@
+<%inherit file="TutorialSample.html"/>
+<%block name="editor_init">
+setcode('Main() {\n    local := "Hello, World!";\n    cplusplus.std.cout << local;\n}', '#include <iostream>')
+</%block>
+<div class="row">
+    <div class="col-md-12">
+        <p>Local variables in Wide are introduced with <code>:=</code>. They are always initialized by calling the constructor. The type is deduced from the initializing expression. Wide always deduces a value, like 
+        <code>auto</code> in C++, unless you explicitly construct an object of a type, in which case the local will always have that type, even if it's a reference. Local variables in Wide are subject to the same rules of 
+        destruction as those in C++. The lifetime of temporaries, however, was expanded to the whole scope.</p>        
+	</div>
+</div>

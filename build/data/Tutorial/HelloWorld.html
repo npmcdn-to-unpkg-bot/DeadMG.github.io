@@ -1,30 +1,7 @@
-<%inherit file="TutorialBase.html"/>
-<%block name="tutorial_header">
-<script type="text/javascript">
-$(function() {
-	document.getElementById('CPPSource').value = '#include <iostream>';
-    document.getElementById('WideSource').value = 'Main() {\n    cplusplus.std.cout << "Hello, World!";\n}';
-});
-</script>
+<%inherit file="TutorialSample.html"/>
+<%block name="editor_init">
+setcode('Main() {\n    cplusplus.std.cout << "Hello, World!";\n}', '#include <iostream>') 
 </%block>
-<%block name="tutorial_jumbotron">
-    <h1>${name}</h1>
-</%block>
-<div class="form-group">
-    <div class="row">
-        <div class="col-md-6"><div class="input-group"><span class="input-group-addon">Wide</span><textarea class="form-control" rows="3" id="WideSource" autocomplete=false></textarea></div></div>
-        <div class="col-md-6"><div class="input-group"><span class="input-group-addon">C++</span><textarea class="form-control" rows="3" id="CPPSource" autocomplete=false></textarea></div></div>
-    </div>
-	<br>
-    <div class="row">
-	    <div class="col-md-12">
-	        <div class="input-group">
-                <span class="input-group-btn"><button class="btn btn-primary" type="button" onclick="compile()" id="compile">Compile</button></span>			    	
-		        <textarea class="form-control" id="result" rows="1" autocomplete=false readOnly=true></textarea>				    
-	     	</div>
-		</div>
-	</div>
-</div>
 <div class="row">
     <div class="col-md-12">
         <p>The Main function defines the code invoked at the beginning of every Wide program. Since Wide does not yet have its own Standard library for I/O, we will simply invoke C++'s.<br>

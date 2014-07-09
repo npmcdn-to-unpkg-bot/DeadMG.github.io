@@ -25,14 +25,14 @@ def create_breadcrumbs(path, result_path, name):
         index = "index.html"
         currdir = ""
         getcurdir = lambda: os.path.normpath(os.path.relpath(urljoin(base, currdir, index), os.path.dirname(result_path)))
-        start += '<nav class="navbar navbar-inverse" style="margin-bottom: 0;" role="navigation"><div class="container"style="padding:0px;"><p class="navbar-text navbar-left"><a class="navbar-link" href="' + getcurdir() + '">Home</a></p>'
+        start += '<p class="navbar-text navbar-left"><a class="navbar-link" href="' + getcurdir() + '">Home</a></p>'
         for dir in dirs:
             currdir = urljoin(currdir, dir)
             start += '<p class="navbar-text navbar-left"><a class="navbar-link" href="' + getcurdir() + '">' + dir + '</a></p>'
         if not 'name' in locals():
             root, ext = os.path.splitext(os.path.basename(path))        
             name = root
-        start += '<p class="navbar-text navbar-left">' + name + '</p></div></nav>'
+        start += '<p class="navbar-text navbar-left">' + name + '</p>'
     return start
 %>
 <!DOCTYPE html>
@@ -55,7 +55,21 @@ def create_breadcrumbs(path, result_path, name):
     <%block name="header"/>
 </head>
 <body>
-    ${create_breadcrumbs(path, result_path, name)}
+    <nav class="navbar navbar-inverse" style="margin-bottom: 0;" role="navigation">
+        <div class="container"style="padding:0px;">
+            ${create_breadcrumbs(path, get_result_path(path), name)}
+            <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Tutorials <span class="caret"></span></a>
+                    <ul class="dropdown-menu" role="menu">
+                    % for file, filename in tutorials:
+                        <li><a href="${get_url_to_from(file, path)}">${filename}</a></li>
+                    % endfor
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
     ${next.body()}
     <div class="container">
         <div class="row">	

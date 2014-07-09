@@ -2,79 +2,38 @@
 <%!
 import os
 from urllib.parse import urljoin
+
+def create_next_pager(files, path, i, get_url_to_from):
+    nextfile, nextname = files[i + 1]
+    return '<li class="next"><a href="' + get_url_to_from(nextfile, path) + '">' + nextname + '</a></li>'
+    
+def create_prev_pager(files, path, i, get_url_to_from):
+    nextfile, nextname = files[i - 1]
+    return '<li class="previous"><a href="' + get_url_to_from(nextfile, path) + '">' + nextname + '</a></li>'
+    
+def create_pagination(files, path, get_url_to_from):
+    if len(files) == 1:
+        return ''
+    for i in range(0, len(files)):
+        filepath, name = files[i]
+        if filepath == path:
+            if i == 0:
+                return '<ul class="pager">' + create_next_pager(files, path, i, get_url_to_from) + '</ul>';
+            if i == len(files) - 1:
+                return '<ul class="pager">' + create_prev_pager(files, path, i, get_url_to_from) + '</ul>'
+            return '<ul class="pager">' + create_prev_pager(files, path, i, get_url_to_from) + create_next_pager(files, path, i, get_url_to_from) + '</ul>';
+    
 %>
 <%block name="header">
-<script type="text/javascript">
-function escapeRegExp(string) {
-    return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
-}
-function replaceAll(find, replace, str) {
-  return str.replace(new RegExp(escapeRegExp(find), 'g'), replace);
-}
-// http://stackoverflow.com/questions/5251520/how-do-i-escape-some-html-in-javascript
-function escapeHTML( string )
-{
-    var pre = document.createElement('pre');
-    var text = document.createTextNode( string );
-    pre.appendChild(text);
-    return pre.innerHTML;
-}
-function enableUI(val) {
-    document.getElementById("compile").disabled = !val;
-	document.getElementById("WideSource").readOnly = !val;
-	document.getElementById("CPPSource").readOnly = !val;
-}
-function compile() {
-    enableUI(false);
-    var http = new XMLHttpRequest();
-	var widesrc = document.getElementById('WideSource').value;
-	var cppsrc = document.getElementById('CPPSource').value;
-    http.open("POST", "http://coliru.stacked-crooked.com/share", true);
-	http.onreadystatechange = function() {
-        if (http.readyState == 4) {
-            if (http.status == 200) {
-                var location = "/Archive2/" + http.responseText.substr(0, 2) + "/" + http.responseText.substr(2, http.responseText.length).trim() + "/main.cpp";
-              	var using = 'using cplusplus := cpp("' + location + '");';
-		        var nestedhttp = new XMLHttpRequest();
-                nestedhttp.open("POST", "http://coliru.stacked-crooked.com/compile", true);
-		        nestedhttp.onreadystatechange = function() {
-                    if (nestedhttp.readyState == 4) {
-                        if (nestedhttp.status == 200) {
-						    enableUI(true);
-							var output = escapeHTML(replaceAll("'x86_64' is not a recognized processor for this target (ignoring processor)", "", nestedhttp.responseText).trim());
-							var rows = output.split("\n").length;
-                            document.getElementById('result').value = output;
-							document.getElementById('result').rows = rows > 5 ? 5 : rows;
-		            	}
-		        	}
-	            }
-                nestedhttp.send(JSON.stringify({ "cmd": "/usr/local/bin/Wide/CLI main.cpp && g++ a.o && ./a.out", "src": widesrc + using }));		
-		    }
-		}
-	}
-    http.send(JSON.stringify({ "cmd": "", "src": cppsrc }));
-}
-</script>
 <title>${name}</title>
 <%block name="tutorial_header"/>
 </%block>
 <div class="jumbotron">
     <div class="container">
-        <%block name="tutorial_jumbotron"/>
+        <h1>${name}</h1>
     </div>
 </div>
 <div class="container" style="padding:0px;">
-    <div class="row">      
-        <div class="col-md-10">
-            ${next.body()}
-        </div>
-        
-        <div class="col-md-2">
-            <ul class="nav">
-                % for file, name in files:
-                    <li><a href="${os.path.relpath(urljoin('../', file), os.path.dirname(result_path))}">${name}</a></li>
-                % endfor
-            </ul>
-        </div>
-    </div>
+    ${next.body()}
+    ${create_pagination(files, path, get_url_to_from)}
 </div>

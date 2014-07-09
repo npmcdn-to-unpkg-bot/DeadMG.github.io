@@ -17,7 +17,7 @@
         })();
     </script>
     
-<title>Hello World!</title>
+<title>Functions</title>
 
     <script type="text/javascript">
     function escapeRegExp(string) {
@@ -79,19 +79,25 @@
     }
     function init() {
         
-setcode('Main() {\n    cplusplus.std.cout << "Hello, World!";\n}', '#include <iostream>') 
+setcode('f(x := cplusplus.std.string) := void {\n    cplusplus.std.cout << x;\n}\nMain() {\n    f("Hello, World!");\n}', '#include <iostream>\n#include <string>')
 
     }
     $(init)
     </script>    
     
+<script type="text/javascript">
+function generic_example() {
+    setcode('f(x) {\n   x.f();\n}\nMain() {\n    f(cplusplus.first);\n    f(cplusplus.second);\n    f(cplusplus.third);\n}', '#include <iostream>\n#include <string>\nnamespace first {')
+}
+</script>
+
 
 
 </head>
 <body>
     <nav class="navbar navbar-inverse" style="margin-bottom: 0;" role="navigation">
         <div class="container"style="padding:0px;">
-            <p class="navbar-text navbar-left"><a class="navbar-link" href="..">Home</a></p><p class="navbar-text navbar-left"><a class="navbar-link" href=".">Tutorial</a></p><p class="navbar-text navbar-left">Hello World!</p>
+            <p class="navbar-text navbar-left"><a class="navbar-link" href="..">Home</a></p><p class="navbar-text navbar-left"><a class="navbar-link" href=".">Tutorial</a></p><p class="navbar-text navbar-left">Functions</p>
             <ul class="nav navbar-nav navbar-right">
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Tutorials <span class="caret"></span></a>
@@ -109,7 +115,7 @@ setcode('Main() {\n    cplusplus.std.cout << "Hello, World!";\n}', '#include <io
 
 <div class="jumbotron">
     <div class="container">
-        <h1>Hello World!</h1>
+        <h1>Functions</h1>
     </div>
 </div>
 <div class="container" style="padding:0px;">
@@ -133,17 +139,21 @@ setcode('Main() {\n    cplusplus.std.cout << "Hello, World!";\n}', '#include <io
 </div>
 
 
+
 <div class="row">
     <div class="col-md-12">
-        <p>The Main function defines the code invoked at the beginning of every Wide program. Since Wide does not yet have its own Standard library for I/O, we will simply invoke C++'s.<br>
-        The cplusplus identifier provided by the web interface is a C++ namespace- the global namespace of the C++ code on the right.<br>
-        When we access a member of a namspace, this refers to the corresponding member of that namespace in that translation unit.<br>
-        Once we have looked up ::std::cout,	then we can use the << operator, just as in C++.</p>
-		<p>Interoperating with C++ is both a core motivation for Wide's existence and a key skill in the early stages. We'll take a look at Wide's other C++ interoperation features next.</p>
+        <p>Functions in Wide are defined by a simple identifier, arguments, then body. The return type may be left off for an inferred return type, as in Main, or it may be made explicit, like f. Return type inference in Wide is 
+        substantially more useful than it's C++ counterpart, because Wide does not have the problem of not being able to infer return types of functions in other translation units. In addition, Wide can infer return types in 
+        recursive functions in a much wider range of circumstances, and can infer the return type when the types are related instead of identical. Most Wide functions that do not have to adhere to a contract should not require an 
+        explicit return type.</p>
+        <p>Main can have a return type of void, in which case it implicitly returns 0 to the operating system, or it can return int.</p>
+        <p>Wide also has duck-typed functions. You can create a duck-typed argument by simply leaving off the type initializer for that argument. Wide will accept absolutely anything for these arguments. Using <code>.</code> to 
+        access members of namespaces as well as objects is not simply a case of syntax re-use- namespace objects are values too and respond to the same member access semantics.
+        <button type="button" class="btn btn-primary btn-sm" onclick="generic_example()">example</button></p>        
 	</div>
 </div>
 
-    <ul class="pager"><li class="next"><a href="LocalVariables.html">Local Variables</a></li></ul>
+    <ul class="pager"><li class="previous"><a href="LocalVariables.html">Local Variables</a></li></ul>
 </div>
 
     <div class="container">
