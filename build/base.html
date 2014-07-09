@@ -1,6 +1,7 @@
 <%!
 import os
 from urllib.parse import urljoin
+from urllib.request import pathname2url
 def splitall(path):
     allparts = []
     while 1:
@@ -24,7 +25,7 @@ def create_breadcrumbs(path, result_path, name):
         base = "../"
         index = "index.html"
         currdir = ""
-        getcurdir = lambda: os.path.normpath(os.path.relpath(urljoin(base, currdir, index), os.path.dirname(result_path)))
+        getcurdir = lambda: pathname2url(os.path.normpath(os.path.relpath(urljoin(base, currdir, index), os.path.dirname(result_path))))
         start += '<p class="navbar-text navbar-left"><a class="navbar-link" href="' + getcurdir() + '">Home</a></p>'
         for dir in dirs:
             currdir = urljoin(currdir, dir)

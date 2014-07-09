@@ -1,7 +1,8 @@
 import os
+import urllib
+import urllib.request
 from os import listdir
 from os.path import isfile, join
-from urllib.parse import urljoin
 from mako.template import Template
 from mako.lookup import TemplateLookup
 
@@ -24,7 +25,7 @@ def get_result_path(path):
     return os.path.join(builddir, get_data_path(path))
     
 def get_url_to_from(to, from_):
-    return urljoin(os.path.relpath(get_result_path(to), os.path.dirname(get_result_path(from_))), '')
+    return urllib.request.pathname2url(os.path.relpath(get_result_path(to), os.path.dirname(get_result_path(from_))))
     
 def make_file(path, func, **kwargs):
     result_path = get_result_path(path)
