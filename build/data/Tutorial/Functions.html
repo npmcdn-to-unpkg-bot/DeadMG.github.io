@@ -5,7 +5,7 @@ setcode('f(x := cplusplus.std.string) := void {\n    cplusplus.std.cout << x;\n}
 <%block name="editor_head">
 <script type="text/javascript">
 function generic_example() {
-    setcode('f(x) {\n   x.f();\n}\nMain() {\n    f(cplusplus.first);\n    f(cplusplus.second);\n    f(cplusplus.third);\n}', '#include <iostream>\n#include <string>\nnamespace first {')
+    setcode('f(x) {\n    x.f();\n}\nMain() {\n    f(cplusplus.first);\n    f(cplusplus.second());\n    f(cplusplus.third());\n}', '#include <iostream>\n#include <string>\nnamespace first { void f() { std::cout << "Hello"; } }\nstruct second { static void f() { std::cout << ", "; } }\nstruct third { void f() { std::cout << "World!"; } }')
 }
 </script>
 </%block>
