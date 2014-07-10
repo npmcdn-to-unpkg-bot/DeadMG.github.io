@@ -9,6 +9,9 @@ function generic_example() {
 }
 </script>
 </%block>
+<%block name="samples">
+<li><a href="#" onclick="generic_example()">Duck-typed arguments</a></li>
+</%block>
 <div class="row">
     <div class="col-md-12">
         <p>Functions in Wide are defined by a simple identifier, arguments, then body. The return type may be left off for an inferred return type, as in Main, or it may be made explicit, like f. Return type inference in Wide is 
@@ -17,7 +20,6 @@ function generic_example() {
         explicit return type.</p>
         <p>Main can have a return type of void, in which case it implicitly returns 0 to the operating system, or it can return int.</p>
         <p>Wide also has duck-typed functions. You can create a duck-typed argument by simply leaving off the type initializer for that argument. Wide will accept absolutely anything for these arguments. Using <code>.</code> to 
-        access members of namespaces as well as objects is not simply a case of syntax re-use- namespace objects are values too and respond to the same member access semantics.
-        <button type="button" class="btn btn-primary btn-sm" onclick="generic_example()">example</button></p>        
+        access members of namespaces as well as objects is not simply a case of syntax re-use- namespace objects are values too and respond to the same member access semantics.</p>     
 	</div>
 </div>

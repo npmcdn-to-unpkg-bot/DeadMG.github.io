@@ -38,7 +38,7 @@
         document.getElementById("compile").disabled = !val;
     	document.getElementById("WideSource").readOnly = !val;
     	document.getElementById("CPPSource").readOnly = !val;
-        document.getElementById("default").disabled = !val;
+        document.getElementById("selector").disabled = !val;
     }
     function compile() {
         enableUI(false);
@@ -57,10 +57,13 @@
                         if (nestedhttp.readyState == 4) {
                             if (nestedhttp.status == 200) {
     						    enableUI(true);
-    							var output = escapeHTML(replaceAll("'x86_64' is not a recognized processor for this target (ignoring processor)", "", nestedhttp.responseText).trim());
-    							var rows = output.split("\n").length;
-                                document.getElementById('result').value = output;
-    							document.getElementById('result').rows = rows > 5 ? 5 : rows;
+                                var response = nestedhttp.responseText;
+                                response = replaceAll("'x86_64' is not a recognized processor for this target (ignoring processor)", "", nestedhttp.responseText)
+                                response = response.trim()
+                                response = escapeHTML(response)
+                                lines = response.split('\n').length
+                                response = replaceAll("\n", "</br>", response)
+                                document.getElementById('result').innerHTML = response;
     		            	}
     		        	}
     	            }
@@ -120,13 +123,21 @@ setcode('Main() {\n    cplusplus.std.cout << "Hello, World!";\n}', '#include <io
         <div class="col-md-6"><div class="input-group"><span class="input-group-addon">Wide</span><textarea class="form-control" rows="3" id="WideSource" autocomplete=false></textarea></div></div>
         <div class="col-md-6"><div class="input-group"><span class="input-group-addon">C++</span><textarea class="form-control" rows="3" id="CPPSource" autocomplete=false></textarea></div></div>
     </div>
-	<br>
     <div class="row">
 	    <div class="col-md-12">
 	        <div class="input-group">
-                <span class="input-group-btn"><button class="btn btn-primary" type="button" onclick="init()" id="default">Default</button></span>			   
-                <span class="input-group-btn"><button class="btn btn-primary" type="button" onclick="compile()" id="compile">Compile</button></span>	 	
-		        <textarea class="form-control" id="result" rows="1" autocomplete=false readOnly=true></textarea>				    
+                <div class="input-group-btn">
+                      <button type="button" class="btn btn-default" id="compile" onclick="compile()">Compile</button>
+                      <button type="button" class="btn btn-default dropdown-toggle" id="selector" data-toggle="dropdown">
+                        <span class="caret"></span>
+                        <span class="sr-only">Toggle Dropdown</span>
+                      </button>
+                      <ul class="dropdown-menu" role="menu">
+                        <li><a href="#" onclick="init()">Hello World!</a></li>
+                        
+                      </ul>
+                </div>
+		        <label class="form-control" id="result" style="height:auto;max-height:120px;min-height:34px;overflow:auto;"></label>		    
 	     	</div>
 		</div>
 	</div>
