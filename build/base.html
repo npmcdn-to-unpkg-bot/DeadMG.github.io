@@ -1,41 +1,3 @@
-<%!
-import os
-from urllib.parse import urljoin
-from urllib.request import pathname2url
-def splitall(path):
-    allparts = []
-    while 1:
-        parts = os.path.split(path)
-        if parts[0] == path:  # sentinel for absolute paths
-            allparts.insert(0, parts[0])
-            break
-        elif parts[1] == path: # sentinel for relative paths
-            allparts.insert(0, parts[1])
-            break
-        else:
-            path = parts[0]
-            allparts.insert(0, parts[1])
-    return allparts
-def create_breadcrumbs(path, result_path, name):
-    start = ''
-    dirs = splitall(path)
-    dirs.pop()
-    dirs.pop(0)
-    if (len(dirs) > 0):
-        base = "../"
-        index = "index.html"
-        currdir = ""
-        getcurdir = lambda: pathname2url(os.path.normpath(os.path.relpath(urljoin(base, currdir, index), os.path.dirname(result_path))))
-        start += '<p class="navbar-text navbar-left"><a class="navbar-link" href="' + getcurdir() + '">Home</a></p>'
-        for dir in dirs:
-            currdir = urljoin(currdir, dir)
-            start += '<p class="navbar-text navbar-left"><a class="navbar-link" href="' + getcurdir() + '">' + dir + '</a></p>'
-        if not 'name' in locals():
-            root, ext = os.path.splitext(os.path.basename(path))        
-            name = root
-        start += '<p class="navbar-text navbar-left">' + name + '</p>'
-    return start
-%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -58,7 +20,7 @@ def create_breadcrumbs(path, result_path, name):
 <body>
     <nav class="navbar navbar-inverse" style="margin-bottom: 0;" role="navigation">
         <div class="container"style="padding:0px;">
-            ${create_breadcrumbs(path, get_result_path(path), name)}
+            <p class="navbar-text navbar-right"><a class="navbar-link" href="${get_url_to_from('data/index.html', path)}">Home</a></p>
             <ul class="nav navbar-nav navbar-right">
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Tutorials <span class="caret"></span></a>
@@ -69,6 +31,7 @@ def create_breadcrumbs(path, result_path, name):
                     </ul>
                 </li>
             </ul>
+            
         </div>
     </nav>
     ${next.body()}

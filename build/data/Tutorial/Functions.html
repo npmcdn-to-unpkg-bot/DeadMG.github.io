@@ -1,6 +1,6 @@
 <%inherit file="TutorialSample.html"/>
 <%block name="editor_init">
-setcode('f(x := cplusplus.std.string) := void {\n    cplusplus.std.cout << x;\n}\nMain() {\n    f("Hello, World!");\n}', '#include <iostream>\n#include <string>')
+setcode('f(x := cplusplus.std.ostream.lvalue) := void {\n    x << "Hello, World!";\n}\nMain() {\n    f(cplusplus.std.cout);\n}', '#include <iostream>\n')
 </%block>
 <%block name="editor_head">
 <script type="text/javascript">
@@ -20,6 +20,7 @@ function generic_example() {
         explicit return type.</p>
         <p>Main can have a return type of void, in which case it implicitly returns 0 to the operating system, or it can return int.</p>
         <p>Wide also has duck-typed functions. You can create a duck-typed argument by simply leaving off the type initializer for that argument. Wide will accept absolutely anything for these arguments. Using <code>.</code> to 
-        access members of namespaces as well as objects is not simply a case of syntax re-use- namespace objects are values too and respond to the same member access semantics.</p>     
+        access members of namespaces as well as objects is not simply a case of syntax re-use- namespace objects are values too and respond to the same member access semantics.</p>   
+        <p>Wide currently has no facilities for named parameters, but they are planned.</p>        
 	</div>
 </div>

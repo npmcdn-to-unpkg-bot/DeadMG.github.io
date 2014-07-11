@@ -55,7 +55,7 @@
         http.send(JSON.stringify({ "cmd": "", "src": cppsrc }));
     }
     function setcode(widesrc, cppsrc) {
-        linecount = Math.max(widesrc.split('\n').length, cppsrc.split('\n').length) - 1
+        linecount = Math.max(Math.max(widesrc.split('\n').length, cppsrc.split('\n').length) - 1, 1)
         document.getElementById('WideSource').rows = linecount;
         document.getElementById('CPPSource').rows = linecount;
         document.getElementById('WideSource').value = widesrc;

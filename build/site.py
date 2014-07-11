@@ -46,6 +46,9 @@ tutorials = [
     (os.path.join(datadir, 'Tutorial/HelloWorld.html'), 'Hello World!'),
     (os.path.join(datadir, 'Tutorial/LocalVariables.html'), 'Local Variables'),
     (os.path.join(datadir, 'Tutorial/Functions.html'), 'Functions'),
+    (os.path.join(datadir, 'Tutorial/OverloadSet.html'), 'Overload Sets'),
+    (os.path.join(datadir, 'Tutorial/CPPUsing.html'), 'cpp'),
+    (os.path.join(datadir, 'Tutorial/ExportedFunctions.html'), 'Exported Functions'),
 ]
 spew_dir(datadir, lambda template, **kwargs: template.render(tutorials=tutorials, **kwargs))
 spew_list(tutorials, lambda template, **kwargs: template.render(files=tutorials, tutorials=tutorials, **kwargs))

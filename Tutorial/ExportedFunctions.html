@@ -16,7 +16,7 @@
         })();
     </script>
     
-<title>Functions</title>
+<title>Exported Functions</title>
 
     <script type="text/javascript">
     function escapeRegExp(string) {
@@ -81,15 +81,24 @@
     }
     function init() {
         
-setcode('f(x := cplusplus.std.ostream.lvalue) := void {\n    x << "Hello, World!";\n}\nMain() {\n    f(cplusplus.std.cout);\n}', '#include <iostream>\n')
+    setcode('[export := cplusplus.f]\nf() {\n    return "Hello, World!";\n}\nMain() {\n    cplusplus.g();\n}', '#include <iostream>\nconst char* f();\nvoid g() {\n    std::cout << f();\n}')
 
     }
     $(init)
     </script>    
     
 <script type="text/javascript">
-function generic_example() {
-    setcode('f(x) {\n    x.f();\n}\nMain() {\n    f(cplusplus.first);\n    f(cplusplus.second());\n    f(cplusplus.third());\n}', '#include <iostream>\n#include <string>\nnamespace first { void f() { std::cout << "Hello"; } }\nstruct second { static void f() { std::cout << ", "; } }\nstruct third { void f() { std::cout << "World!"; } }')
+function resolve_example() {
+    setcode(
+        'using t := cplusplus.t;\n[export := t().f.resolve(t.lvalue)]\nf(this := t.lvalue) {\n    return "Hello,";\n}\n[export := t().f.resolve(t.rvalue)]\nf(this := t.lvalue) {\n    return " World!";\n}\nMain() {\n   cplusplus.g();\n}', 
+        '#include <iostream>\nstruct t {\n    const char* f() &;\n    const char* f() &&;\n};\nvoid g() {\n    t obj;\n    std::cout << obj.f() << t().f();\n}'
+    )
+}
+function destructor_example() {
+    setcode(
+        '[export := cplusplus.t.destructor]\n~type() {\n    std.cout << "Hello, World!";\n}\nMain() {\n    cplusplus.g();\n}', 
+        'struct t { ~t(); };\nvoid g() {\n    t obj;\n}'
+    )
 }
 </script>
 
@@ -121,7 +130,7 @@ function generic_example() {
 
 <div class="jumbotron">
     <div class="container">
-        <h1>Functions</h1>
+        <h1>Exported Functions</h1>
     </div>
 </div>
 <div class="container" style="padding:0px;">
@@ -142,9 +151,10 @@ function generic_example() {
                         <span class="sr-only">Toggle Dropdown</span>
                       </button>
                       <ul class="dropdown-menu" role="menu">
-                        <li><a href="#" onclick="init()">Functions</a></li>
+                        <li><a href="#" onclick="init()">Exported Functions</a></li>
                         
-<li><a href="#" onclick="generic_example()">Duck-typed arguments</a></li>
+<li><a href="#" onclick="resolve_example()">Member sets</a></li>
+<li><a href="#" onclick="destructor_example()">Destructor</a></li>
 
                       </ul>
                 </div>
@@ -159,18 +169,21 @@ function generic_example() {
 
 <div class="row">
     <div class="col-md-12">
-        <p>Functions in Wide are defined by a simple identifier, arguments, then body. The return type may be left off for an inferred return type, as in Main, or it may be made explicit, like f. Return type inference in Wide is 
-        substantially more useful than it's C++ counterpart, because Wide does not have the problem of not being able to infer return types of functions in other translation units. In addition, Wide can infer return types in 
-        recursive functions in a much wider range of circumstances, and can infer the return type when the types are related instead of identical. Most Wide functions that do not have to adhere to a contract should not require an 
-        explicit return type.</p>
-        <p>Main can have a return type of void, in which case it implicitly returns 0 to the operating system, or it can return int.</p>
-        <p>Wide also has duck-typed functions. You can create a duck-typed argument by simply leaving off the type initializer for that argument. Wide will accept absolutely anything for these arguments. Using <code>.</code> to 
-        access members of namespaces as well as objects is not simply a case of syntax re-use- namespace objects are values too and respond to the same member access semantics.</p>   
-        <p>Wide currently has no facilities for named parameters, but they are planned.</p>        
+        <p>A core tenet of Wide's interoperation strategy is that you should be able to migrate existing C++ codebases to Wide one piece at a time. This implies implementing C++ functions from Wide. To do this we introduce the 
+        export attribute. Currently only certain special attributes are supported, not generic user-defined attributes. The export attribute defines that a Wide function should be exported as implementing a given C++ function. The
+        detail of mangled names is handled automatically by the implementation and not exposed to the user. The Wide export mechanism permits exporting one Wide function as an arbitrarily large number of C++ functions.</p>
+        <p>For functions which stand alone, a simple reference is enough. For functions which are members of an overload set, we introduce the "resolve" member. The result of calling "resolve" with a list of types is an overload 
+        set carrying the single function that was result of performing overload resolution on that set. For member functions, an explicit "this" is required. For destructors and constructors, always pass lvalue reference as "this".
+        Otherwise, you can pass either lvalue or rvalue to respect ref-qualifiers. Exported member functions gain all the rights, like implicit member lookup and private member access, of ordinary member 
+        functions.</p>
+        <p>Currently, there is no way to refer to a member overload set except by using a value of that object. In addition, the compiler does not properly check the signature of exported functions, so be sure they match.</p>
+        <p>Wide does not inherently ban having two functions in a set that would always be ambiguous. This merely makes them uncallable, which is perfectly acceptable if their main purpose is to be exported. Similarly to support
+        exporting constructors and destructors, both can be declared at module scope instead of just at member scope. To refer to a constructor or destructor, you can simply use t.constructors or t.destructor. When defining a 
+        destructor, Wide automatically adds "this" for you.</p>
 	</div>
 </div>
 
-    <ul class="pager"><li class="previous"><a href="LocalVariables.html">Local Variables</a></li><li class="next"><a href="OverloadSet.html">Overload Sets</a></li></ul>
+    <ul class="pager"><li class="previous"><a href="CPPUsing.html">cpp</a></li></ul>
 </div>
 
     <div class="container">
