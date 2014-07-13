@@ -92,8 +92,11 @@ setcode('f(x := cplusplus.std.ostream.lvalue) := void {\n    x << "Hello, World!
 function generic_example() {
     setcode('f(x) {\n    x.f();\n}\nMain() {\n    f(cplusplus.first);\n    f(cplusplus.second());\n    f(cplusplus.third());\n}', '#include <iostream>\n#include <string>\nnamespace first { void f() { std::cout << "Hello"; } }\nstruct second { static void f() { std::cout << ", "; } }\nstruct third { void f() { std::cout << "World!"; } }')
 }
-function inference_related_example() {
-    setcode('f(x) {\n    if (x) return boost.optional
+function inference_example() {
+    setcode(
+        'f(x := bool) {\n    if (x) return cplusplus.boost.make_optional("Hello, World!");\n    return cplusplus.boost.none;\n}\nMain() {\n    if (result := f(true))\n        cplusplus.std.cout << "Hello, World!";\n}',
+        '#include <iostream>\n#include <boost/optional.hpp>'
+    );
 }
 </script>
 
@@ -196,6 +199,7 @@ function inference_related_example() {
                       <ul class="dropdown-menu" role="menu">
                         <li><a href="#" onclick="init()">Functions</a></li>
                         
+<li><a href="#" onclick="inference_example()">Return Type Inference</a></li>
 <li><a href="#" onclick="generic_example()">Duck-typed arguments</a></li>
 
                       </ul>
