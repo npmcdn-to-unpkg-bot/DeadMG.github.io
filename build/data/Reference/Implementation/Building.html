@@ -9,7 +9,6 @@
 </div>
 <div class="container">
     <p>Building Wide is a somewhat tricky process, due to the fact that it has a large dependency which takes some care to build correctly.</p>
-    <p>Currently, Wide requires premake4, Boost, and LLVM/Clang to build.</p>
     <table class="table">
     <colgroup><col class="col-md-1"></col><col class="col-md-7"></col></colgroup>
     <tr><th>Build Dependency</th><th>Notes</th></tr>
@@ -29,4 +28,9 @@
     <tr><td>Wide stdlib</td><td>Wide expects to find its own stdlib packaged relative to either the executable directory or the working directory. The build script will automatically package this for you in the Deployment directory.
     </td></tr>
     </table>
+    <p>To build Wide, get the <a href="">source from Bitbucket</a>. Enter the root Wide directory and run premake4. You will need to pass the location of LLVM (--llvm-path) and Boost (--boost-path). If you are on Linux, and you 
+    have installed Boost from package, pass " " as the Boost path. You may also need to pass the LLVM configuration (--llvm-conf) that you built LLVM with, if it is not "Release" for building Wide in release, and "Debug" for 
+    building Wide in debug. Finally, add the action that tells Premake which build system to target. This should be gmake for GNU Make, or vs2010 for Visual Studio. Wide doesn't directly support VS2010 but it's a simple matter of 
+    changing the toolset to the newer version- no further changes required. Wide does not build with clang-cl due to use of exceptions.</p>
+    <p>In some cases on Linux, some extra Premake options may be required. These options 
 </div>

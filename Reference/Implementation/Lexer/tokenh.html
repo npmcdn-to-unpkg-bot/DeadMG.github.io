@@ -114,7 +114,7 @@
         <colgroup><col class="col-md-1"></col><col class="col-md-7"></col></colgroup>
         <tr>Name<th></th><th>Function</th></tr>
         <tr><td>TokenType</td><td>It defines a TokenType type, which is currently a <code>const std::string*</code> that indicates the run-time type of a token. It's intentional that users can define their own token types and add 
-        them to the lexer's data structures. The default token types are in a TokenTypes subnamespace, e.g. Wide::Lexer::TokenTypes::OpenBracket.</td></tr>
+        them to the lexer's data structures. The default token types are in a TokenTypes subnamespace, e.g. const std::string Wide::Lexer::TokenTypes::OpenBracket.</td></tr>
         <tr><td>Position</td><td>Represents a location in a source file. Must be constructed with a <code>std::shared_ptr&lt;std::string&gt;</code> that represents the filename. Note that Wide does not require this to actually be a
         filename on the hard disk- it is only ever de-referenced for diagnostics, so it should never be null, but else can be anything. Position also contains a line, column, and offset, and before/after functions. Adding two 
         Positions produces a Range.</td></tr>
