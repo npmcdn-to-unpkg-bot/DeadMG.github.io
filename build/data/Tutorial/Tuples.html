@@ -1,0 +1,22 @@
+<%inherit file="TutorialSample.html"/>
+<%block name="editor_init">
+setcode('f() {\n    return { "Hello,", " World!" };\n}\nMain() {\n    hello, world := f();\n    std.cout << hello << world;\n}', '#include <iostream>') 
+</%block>
+<%block name="editor_head">
+<script type="text/javascript">
+function extra_example() {
+    setcode('Main() {\n    cplusplus.std.cout << "Mission " << "Accomplished.";\n}', '#include <iostream>')
+}
+</script>
+</%block>
+<%block name="samples">
+<li><a href="#" onclick="extra_example()">Chain</a></li>
+</%block>
+<div class="row">
+    <div class="col-md-12">
+        <p>Wide has language-level support for tuples. Tuple objects are specified as <code>{ expressions }</code>. You can unpack tuples using <code>x, y := tuple;</code>. Tuples can contain any Wide object, and they have available
+        operations that their members support, such as copying.</p>
+        <p>Wide supports tuple-initialization. This is for Wide and C++ user-defined types that do not define any of the five special members- copy/move constructor/assignment operator, and destructor. This is essentially a special 
+        constructor which accepts a tuple, where each member is constructed from one object in the tuple. Wide can also perform implicit conversions if the object types are implicitly convertible to the members.</p>
+	</div>
+</div>

@@ -27,10 +27,14 @@ tutorials = [
     (os.path.join(datadir, 'Tutorial/OverloadSet.html'), 'Overload Sets'),
     (os.path.join(datadir, 'Tutorial/CPPUsing.html'), 'cpp'),
     (os.path.join(datadir, 'Tutorial/ExportedFunctions.html'), 'Exported Functions'),
+    (os.path.join(datadir, 'Tutorial/UDTs.html'), 'User Defined Types'),
+    (os.path.join(datadir, 'Tutorial/Templates.html'), 'Templates'),
+    (os.path.join(datadir, 'Tutorial/Tuples.html'), 'Tuples'),
 ]
 reference = [
     (
-        "Implementation", 
+        "Implementation",
+        os.path.join(datadir, "Reference/Implementation.html"),
         [
             (
                  os.path.join(datadir, 'Reference/Implementation/Lexer.html'), 
@@ -54,11 +58,22 @@ reference = [
             (os.path.join(datadir, 'Reference/Implementation/Analyzer.html'), 'Analyzer', []),
             (os.path.join(datadir, 'Reference/Implementation/CAPI.html'), 'CAPI', []),
             (os.path.join(datadir, 'Reference/Implementation/CLI.html'), 'CLI', []),
-            (os.path.join(datadir, 'Reference/Implementation/Util.html'), 'Util', [])
+            (
+                os.path.join(datadir, 'Reference/Implementation/Util.html'),
+                'Util', 
+                [
+                    (
+                        os.path.join(datadir, 'Reference/Implementation/Util/Ranges.html'),
+                        'Ranges'
+                    )
+                ]
+            ),
+            (os.path.join(datadir, 'Reference/Implementation/Building.html'), 'Building', []),
         ]
     ),
     (
         "Syntax", 
+        os.path.join(datadir, "Reference/Syntax.html"),
         [
             (os.path.join(datadir, 'Reference/Syntax/Lexical.html'), 'Lexical', []),
             (os.path.join(datadir, 'Reference/Syntax/Grammar.html'), 'Grammar', []),
@@ -66,6 +81,7 @@ reference = [
     ),
     (
         "Semantics", 
+        os.path.join(datadir, "Reference/Semantics.html"),
         [
             (os.path.join(datadir, 'Reference/Semantics/Type.html'), 'Type', []),
             (os.path.join(datadir, 'Reference/Semantics/AggregateType.html'), 'AggregateType', []),
@@ -73,11 +89,11 @@ reference = [
             (os.path.join(datadir, 'Reference/Semantics/PrimitiveType.html'), 'PrimitiveType', []),
             (os.path.join(datadir, 'Reference/Semantics/OverloadSet.html'), 'OverloadSet', []),
             (os.path.join(datadir, 'Reference/Semantics/CPPNamespace.html'), 'CPPNamespace', []),
-            (os.path.join(datadir, 'Reference/Semantics/UserDefinedType.html'), 'UserDefinedType', []),
         ]
     ),
     (
         "Library", 
+        os.path.join(datadir, "Reference/Library.html"),
         [
         ]
     )
@@ -116,7 +132,8 @@ for file in files(datadir):
 for file, name in tutorials:
     make_file(file, name=name)
     
-for subfolder, files in reference:
+for name, landing, files in reference:
+    make_file(landing, name=name)
     for file, name, subfiles in files:
         make_file(file, name=name)
         for subfile, subname in subfiles:

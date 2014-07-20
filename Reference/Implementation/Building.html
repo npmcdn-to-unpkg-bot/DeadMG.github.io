@@ -17,7 +17,7 @@
         })();
     </script>
     
-<title>OverloadSet</title>
+<title>Building</title>
 
 </head>
 <body>
@@ -51,24 +51,24 @@
                             <a href="../Implementation.html">Implementation</a>
                             <ul class="dropdown-menu">                            
                                         <li class="dropdown-submenu">
-                                        <a href="../Implementation/Lexer.html">Lexer</a>
+                                        <a href="Lexer.html">Lexer</a>
                                             <ul class="dropdown-menu">       
-                                                <li><a href="../Implementation/Lexer/lexerh.html">Lexer.h</a></li>                                            
-                                                <li><a href="../Implementation/Lexer/tokenh.html">Token.h</a></li>                                            
-                                                <li><a href="../Implementation/Lexer/lexercpp.html">Lexer.cpp</a></li>                                            
+                                                <li><a href="Lexer/lexerh.html">Lexer.h</a></li>                                            
+                                                <li><a href="Lexer/tokenh.html">Token.h</a></li>                                            
+                                                <li><a href="Lexer/lexercpp.html">Lexer.cpp</a></li>                                            
                                             </ul>
                                         </li>        
-                                        <li><a href="../Implementation/Parser.html">Parser</a></li>
-                                        <li><a href="../Implementation/Analyzer.html">Analyzer</a></li>
-                                        <li><a href="../Implementation/CAPI.html">CAPI</a></li>
-                                        <li><a href="../Implementation/CLI.html">CLI</a></li>
+                                        <li><a href="Parser.html">Parser</a></li>
+                                        <li><a href="Analyzer.html">Analyzer</a></li>
+                                        <li><a href="CAPI.html">CAPI</a></li>
+                                        <li><a href="CLI.html">CLI</a></li>
                                         <li class="dropdown-submenu">
-                                        <a href="../Implementation/Util.html">Util</a>
+                                        <a href="Util.html">Util</a>
                                             <ul class="dropdown-menu">       
-                                                <li><a href="../Implementation/Util/Ranges.html">Ranges</a></li>                                            
+                                                <li><a href="Util/Ranges.html">Ranges</a></li>                                            
                                             </ul>
                                         </li>        
-                                        <li><a href="../Implementation/Building.html">Building</a></li>
+                                        <li><a href="Building.html">Building</a></li>
                             </ul>
                         </li>
                         <li class="dropdown-submenu">
@@ -81,12 +81,12 @@
                         <li class="dropdown-submenu">
                             <a href="../Semantics.html">Semantics</a>
                             <ul class="dropdown-menu">                            
-                                        <li><a href="Type.html">Type</a></li>
-                                        <li><a href="AggregateType.html">AggregateType</a></li>
-                                        <li><a href="MetaType.html">MetaType</a></li>
-                                        <li><a href="PrimitiveType.html">PrimitiveType</a></li>
-                                        <li><a href="OverloadSet.html">OverloadSet</a></li>
-                                        <li><a href="CPPNamespace.html">CPPNamespace</a></li>
+                                        <li><a href="../Semantics/Type.html">Type</a></li>
+                                        <li><a href="../Semantics/AggregateType.html">AggregateType</a></li>
+                                        <li><a href="../Semantics/MetaType.html">MetaType</a></li>
+                                        <li><a href="../Semantics/PrimitiveType.html">PrimitiveType</a></li>
+                                        <li><a href="../Semantics/OverloadSet.html">OverloadSet</a></li>
+                                        <li><a href="../Semantics/CPPNamespace.html">CPPNamespace</a></li>
                             </ul>
                         </li>
                         <li class="dropdown-submenu">
@@ -101,35 +101,34 @@
     </nav>
     
 
-    <div class="jumbotron">
-        <div class="container">
-            <h1>Overload Set</h1>
-        </div>
-	</div>
+<div class="jumbotron">
     <div class="container">
-	<div class="col-12-md">
-	<p>Overload sets come in two kinds- member and non-member.</p>
-    <p>Non-member overload sets are an aggregate type with no members. Member overload sets are aggregates whose members are one pointer to the bound type. Member overload sets that were bound to lvalues and rvalues are distinct 
-	types.</p>
-	<p>An overload set may hold an arbitrary number of Wide resolvables, and C++ functions or function templates.</p>
-	<p>Overload sets offer the function call operator. When called, they call one of the Wide resolvable or C++ functions that they hold with the argument list. The algorithm for determining which one is known as overload resolution.</p>
-	<p>When invoking an overload set directly, if the overload set is a member overload set, then de-reference the held pointer, and cast the result to an rvalue if the overload set was bound to an rvalue, and place this extra
-	argument at the front of the argument list.</p>
-	<ol>
-	    <li>Consider the Wide and C++ sets separately. If overload resolution succeeds for exactly one of these sets, the call is made to that callable, else, the program is ill-formed. Overload resolution for C++ sets fails if 
-		any type in the arguments is not convertible to a C++ type. Else, the rules for C++ overload resolution are determined by the C++ Standard. For Wide sets,</li>
-	    <li>Remove from the set all resolvables that cannot accept the argument list. If there are no resolvables left, then overload resolution fails.</li>
-		<li>For all remaining resolvables, determine the parameter list. One resolvable is more specialized than another if, for at least one parameter, that parameter is-a the corresponding parameter, and the reverse is not true
-        for any pair of parameters.</li>
-		<li>Sort the set of resolvables according to which is more specialized. If the most specialized resolvable is more specialized than the next resolvable in the sorted list, then that resolvable is the result. Else, overload 
-		resolution fails.</li>
-	</ol>
-	<p>Overload sets also offer a single named member, named "resolve". The result of accessing this member shall be a value, that is a meta type, that when invoked with arguments that shall all be constructor types, shall produce 
-	an overload set whose sole resolvable shall be the result of overload resolution from the set with argument types that correspond to the types passed. No implicit this is added- if a resolvable is a member function then the 
-	first argument passed to resolve is the type of this.</p>
-	<p>The union of two overload sets is an overload set containing the union of the Wide resolvables and C++ functions of the arguments.</p>
-	</div></div>
-
+        <h1>Building Wide</h1>
+    </div>
+</div>
+<div class="container">
+    <p>Building Wide is a somewhat tricky process, due to the fact that it has a large dependency which takes some care to build correctly.</p>
+    <p>Currently, Wide requires premake4, Boost, and LLVM/Clang to build.</p>
+    <table class="table">
+    <colgroup><col class="col-md-1"></col><col class="col-md-7"></col></colgroup>
+    <tr><th>Build Dependency</th><th>Notes</th></tr>
+    <tr><td>Boost</td><td>Wide depends on Boost.Variant, and Boost.ProgramOptions. Boost.ProgramOptions is not header-only so an appropriate Boost.ProgramOptions binary is needed.</td></tr>
+    <tr><td>LLVM/Clang</td><td>Wide depends on APIs that are not made public by Clang. This means that you have to build LLVM/Clang (a dev package on Linux is not enough). If you are using Itanium ABI (Clang/GCC) then be especially 
+    careful to enable RTTI when building them. Wide depends on RTTI and Itanium cannot handle linking together programs compiled with and without RTTI. When building with MSVC on Windows be especially careful to set your settings for 
+    stuff like static/dynamic Standard library correctly, as rebuilding to fix any mismatches will be unpleasant.</td></tr>
+    <tr><td>Premake</td><td>On Linux, a premake4 package is sufficient. On Windows you will need <a href="https://bitbucket.org/DeadMG/wide/downloads/premake4.exe">a build of Premake 4.4</a> which is not officially released yet.</td></tr>
+    <tr><td>Host toolchain</td><td>Wide depends on some of the earliest-implemented C++11 features, like lambdas and rvalue references. Wide also makes use of C++11 stdlib features. Wide also uses RTTI and exceptions.</td></tr>   
+    </table>
+    <table class="table">
+    <colgroup><col class="col-md-1"></col><col class="col-md-7"></col></colgroup>
+    <tr><th>Execution Dependency</th><th>Notes</th></tr>
+    <tr><td>Standard Library</td><td>Wide uses Clang 3.4 and Itanium ABI. This means that on Windows you will need GCC with libstdc++. MinGW >4.6 has known ABI incompatibility. libstdc++ 4.9 has known incompatibility with Clang 3.4.
+    Wide is currently tested against libstdc++ 4.8.2 x64 on Linux and MinGW 4.6.3 x86 on Windows. Wide currently invokes g++ to detect include paths automatically on Linux. On Windows, Wide expects to find MinGW in the working 
+    directory- else you can pass a command-line flag to locate it. Wide is not tested against any other stdlib or platform.</td></tr>
+    <tr><td>Wide stdlib</td><td>Wide expects to find its own stdlib packaged relative to either the executable directory or the working directory. The build script will automatically package this for you in the Deployment directory.
+    </td></tr>
+    </table>
+</div>
     <div class="container">
         <div class="row">	
 	        <footer>&copy; Puppy 2014 <a href="http://coliru.stacked-crooked.com">Compilation services provided by Coliru.</a></footer>

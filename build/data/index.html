@@ -1,4 +1,4 @@
-<%inherit file="../base.html"/>
+<%inherit file="/base.html"/>
 <%block name="header">
 <title>Coding Puppy</title>
 <script type="text/javascript">
@@ -15,32 +15,12 @@ $(function() {
 		</div>
         <div class="row">
             <div class="col-md-1"><p><a class="btn btn-primary btn-lg" role="button" href="Tutorial/HelloWorld.html">Tutorial</a></p></div>
-            <div class="col-md-2">
-                <button class="btn btn-primary btn-lg dropdown-toggle" data-toggle="dropdown">Reference <span class="caret"></span></button>
-                <ul class="dropdown-menu" role="menu">
-                % for name, files in reference:
-                    <li class="dropdown-submenu">
-                        <a href="#">${name}</a>
-                        <ul class="dropdown-menu">                            
-                            % for filepath, dirname, subfiles in files:
-                                % if len(subfiles) > 0:
-                                    <li class="dropdown-submenu">
-                                    <a href="${get_url_to_from(filepath, path)}">${dirname}</a>
-                                        <ul class="dropdown-menu">       
-                                        % for subfile, subname in subfiles:
-                                            <li><a href="${get_url_to_from(subfile, path)}">${subname}</a></li>                                            
-                                        % endfor
-                                        </ul>
-                                    </li>        
-                                % else:
-                                    <li><a href="${get_url_to_from(filepath, path)}">${dirname}</a></li>
-                                % endif                                    
-                            % endfor
-                        </ul>
-                    </li>
-                % endfor
-                </ul>
-            </div>
 		</div>
     </div>
+</div>
+<div class="container">
+    <div class="row">
+        <p>Wide is a new language deriving from C++. Wide aims to offer total compatibility with existing C++ codebases. Wide currently has only a single, very experimental implementation.</p>
+        <p>Click the tutorial button for a quick walkthrough of Wide's current feature set.</p>
+	</div>
 </div>

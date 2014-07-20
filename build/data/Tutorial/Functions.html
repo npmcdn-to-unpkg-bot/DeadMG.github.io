@@ -9,8 +9,8 @@ function generic_example() {
 }
 function inference_example() {
     setcode(
-        'f(x := bool) {\n    if (x) return cplusplus.boost.make_optional("Hello, World!");\n    return cplusplus.boost.none;\n}\nMain() {\n    if (result := f(true))\n        cplusplus.std.cout << "Hello, World!";\n}',
-        '#include <iostream>\n#include <boost/optional.hpp>'
+        'f(x := bool) {\n    if (x) return cplusplus.std.string("Hello, World!");\n    return "Epic fail.";\n}\nMain() {\n    result := f(true);\n        cplusplus.std.cout << result;\n}',
+        '#include <iostream>\n#include <string>\n'
     );
 }
 </script>

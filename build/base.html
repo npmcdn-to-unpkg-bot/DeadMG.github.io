@@ -22,7 +22,10 @@
     <nav class="navbar navbar-inverse" style="margin-bottom: 0;" role="navigation">
         <div class="container"style="padding:0px;">
             <p class="navbar-text navbar-right"><a class="navbar-link" href="${get_url_to_from('data/index.html', path)}">Home</a></p>
-            <ul class="nav navbar-nav navbar-right">
+            <p class="navbar-text navbar-right"><a class="navbar-link" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=QVSUDSKW22LEN&lc=GB&item_number=CodePuppy&currency_code=GBP&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">Donate</a></p>
+            <p class="navbar-text navbar-right"><a class="navbar-link" href="http://bitbucket.org/DeadMG/wide">Source</a></p>
+            <p class="navbar-text navbar-right"><a class="navbar-link" href="http://chat.stackoverflow.com/rooms/10/loungec">Chat</a></p>
+            <ul class="nav navbar-nav navbar-left">
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Tutorials <span class="caret"></span></a>
                     <ul class="dropdown-menu" role="menu">
@@ -32,13 +35,13 @@
                     </ul>
                 </li>
             </ul>
-            <ul class="nav navbar-nav navbar-right">
+            <ul class="nav navbar-nav navbar-left">
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Reference <span class="caret"></span></a>
                     <ul class="dropdown-menu" role="menu">
-                    % for name, files in reference:
+                    % for name, landing, files in reference:
                         <li class="dropdown-submenu">
-                            <a href="#">${name}</a>
+                            <a href="${get_url_to_from(landing, path)}">${name}</a>
                             <ul class="dropdown-menu">                            
                                 % for filepath, dirname, subfiles in files:
                                     % if len(subfiles) > 0:
