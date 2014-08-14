@@ -4,13 +4,16 @@ setcode('f() {\n    return { "Hello,", " World!" };\n}\nMain() {\n    hello, wor
 </%block>
 <%block name="editor_head">
 <script type="text/javascript">
-function extra_example() {
-    setcode('Main() {\n    cplusplus.std.cout << "Mission " << "Accomplished.";\n}', '#include <iostream>')
+function init_example() {
+    setcode('type t {\n    hello := std.string;\n    world := std.string;\n}\nMain() {\n    local := t({"Hello,", " World"});\n    std.cout << local.hello << local.world;\n}', '#include <iostream>')
+}
+function implicit_conversion() {
+    setcode('type t { var := int32; }\ntype t2 { var := int64; }\nf(arg := t) { 
 }
 </script>
 </%block>
 <%block name="samples">
-<li><a href="#" onclick="extra_example()">Chain</a></li>
+<li><a href="#" onclick="init_example()">UDT Initializer</a></li>
 </%block>
 <div class="row">
     <div class="col-md-12">

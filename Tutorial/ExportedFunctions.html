@@ -91,7 +91,7 @@
 <script type="text/javascript">
 function resolve_example() {
     setcode(
-        'using t := cplusplus.t;\n[export := t().f.resolve(t.lvalue)]\nf(this := t.lvalue) {\n    return "Hello,";\n}\n[export := t().f.resolve(t.rvalue)]\nf(this := t.lvalue) {\n    return " World!";\n}\nMain() {\n   cplusplus.g();\n}', 
+        'using t := cplusplus.t;\n[export := t.members.f.resolve(t.lvalue)]\nf(this := t.lvalue) {\n    return "Hello,";\n}\n[export := t.members.f.resolve(t.rvalue)]\nf(this := t.lvalue) {\n    return " World!";\n}\nMain() {\n   cplusplus.g();\n}', 
         '#include <iostream>\nstruct t {\n    const char* f() &;\n    const char* f() &&;\n};\nvoid g() {\n    t obj;\n    std::cout << obj.f() << t().f();\n}'
     )
 }
@@ -99,6 +99,12 @@ function destructor_example() {
     setcode(
         '[export := cplusplus.t.destructor]\n~type() {\n    std.cout << "Hello, World!";\n}\nMain() {\n    cplusplus.g();\n}', 
         'struct t { ~t(); };\nvoid g() {\n    t obj;\n}'
+    )
+}
+function conversion_example() {
+    setcode(
+        '[export := cplusplus.f]\nf() {\n    return "Hello, World!";\n}\nMain() {\n    cplusplus.g();\n}',
+        '#include <string>\n#include <iostream>\nstd::string f();\nvoid g() {\n    std::cout << f();\n}'
     )
 }
 </script>
@@ -113,6 +119,7 @@ function destructor_example() {
             <p class="navbar-text navbar-right"><a class="navbar-link" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=QVSUDSKW22LEN&lc=GB&item_number=CodePuppy&currency_code=GBP&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">Donate</a></p>
             <p class="navbar-text navbar-right"><a class="navbar-link" href="http://bitbucket.org/DeadMG/wide">Source</a></p>
             <p class="navbar-text navbar-right"><a class="navbar-link" href="http://chat.stackoverflow.com/rooms/10/loungec">Chat</a></p>
+            <p class="navbar-text navbar-right"><a class="navbar-link" href="http://cpp-thenewoldthing.blogspot.co.uk/">Blog</a></p>
             <ul class="nav navbar-nav navbar-left">
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Tutorials <span class="caret"></span></a>
@@ -205,20 +212,20 @@ function destructor_example() {
 	    <div class="col-md-12">
 	        <div class="input-group">
                 <div class="input-group-btn">
-                      <button type="button" class="btn btn-default" id="compile" onclick="compile()">Compile</button>
-                      <button type="button" class="btn btn-default dropdown-toggle" id="selector" data-toggle="dropdown">
-                        <span class="caret"></span>
-                        <span class="sr-only">Toggle Dropdown</span>
-                      </button>
-                      <ul class="dropdown-menu" role="menu">
+                    <button type="button" class="btn btn-default" id="compile" onclick="compile()">Compile</button>
+                </div>
+		        <label class="form-control" id="result" style="height:auto;max-height:120px;min-height:34px;overflow:auto;"></label>		
+                <div class="input-group-btn">
+                    <button type="button" class="btn btn-default dropdown-toggle" id="selector" data-toggle="dropdown">Examples <span class="caret"></span></button>
+                    <ul class="dropdown-menu" role="menu">
                         <li><a href="#" onclick="init()">Exported Functions</a></li>
                         
 <li><a href="#" onclick="resolve_example()">Member sets</a></li>
 <li><a href="#" onclick="destructor_example()">Destructor</a></li>
+<li><a href="#" onclick="conversion_example()">Conversion</a></li>
 
-                      </ul>
-                </div>
-		        <label class="form-control" id="result" style="height:auto;max-height:120px;min-height:34px;overflow:auto;"></label>		    
+                    </ul>
+                </div>    
 	     	</div>
 		</div>
 	</div>
@@ -230,16 +237,17 @@ function destructor_example() {
 <div class="row">
     <div class="col-md-12">
         <p>A core tenet of Wide's interoperation strategy is that you should be able to migrate existing C++ codebases to Wide one piece at a time. This implies implementing C++ functions from Wide. To do this we introduce the 
-        export attribute. Currently only certain special attributes are supported, not generic user-defined attributes. The export attribute defines that a Wide function should be exported as implementing a given C++ function. The
-        detail of mangled names is handled automatically by the implementation and not exposed to the user. The Wide export mechanism permits exporting one Wide function as an arbitrarily large number of C++ functions.</p>
-        <p>For functions which stand alone, a simple reference is enough. For functions which are members of an overload set, we introduce the "resolve" member. The result of calling "resolve" with a list of types is an overload 
-        set carrying the single function that was result of performing overload resolution on that set. For member functions, an explicit "this" is required. For destructors and constructors, always pass lvalue reference as "this".
-        Otherwise, you can pass either lvalue or rvalue to respect ref-qualifiers. Exported member functions gain all the rights, like implicit member lookup and private member access, of ordinary member 
-        functions.</p>
-        <p>Currently, there is no way to refer to a member overload set except by using a value of that object. In addition, the compiler does not properly check the signature of exported functions, so be sure they match.</p>
+        <code>export</code> attribute. Currently only certain special attributes are supported, not generic user-defined attributes. The export attribute defines that a Wide function should be exported as implementing a given C++ 
+        function. The detail of mangled names is handled automatically by the implementation and not exposed to the user.</p>
+        <p>For functions which stand alone, a simple reference is enough. For functions which are members of an overload set, we introduce the <code>resolve</code> member. The result of calling <code>resolve</code> with a list of 
+        types is an overload set carrying the single C++ function that was result of performing overload resolution on that set. Exported member functions gain all the rights, like implicit member lookup and private member 
+        access, of ordinary member functions. You can access members statically using <code>t.members</code>. This presents static and non-static members uniformly, where non-static members also take a <code>this</code>. It is also 
+        the means you can use to access other static context like types or constants.</p>
         <p>Wide does not inherently ban having two functions in a set that would always be ambiguous. This merely makes them uncallable, which is perfectly acceptable if their main purpose is to be exported. Similarly to support
-        exporting constructors and destructors, both can be declared at module scope instead of just at member scope. To refer to a constructor or destructor, you can simply use t.constructors or t.destructor. When defining a 
-        destructor, Wide automatically adds "this" for you.</p>
+        exporting constructors and destructors, both can be declared at module scope instead of just at member scope. To refer to a constructor or destructor, you can simply use <code>t.constructors</code> or <code>t.destructor</code>. 
+        When defining a destructor, Wide automatically adds <code>this</code> for you.</p>
+        <p>Wide can perform implicit conversions when creating thunks, for argument types and return types. This was upgraded from covariance in C++ because of the problem of smart pointers not being directly covariant but needing 
+        to support the same derived-to-base conversions in the same contexts.</p>
 	</div>
 </div>
 

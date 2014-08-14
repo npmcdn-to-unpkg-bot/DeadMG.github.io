@@ -77,17 +77,16 @@
 	    <div class="col-md-12">
 	        <div class="input-group">
                 <div class="input-group-btn">
-                      <button type="button" class="btn btn-default" id="compile" onclick="compile()">Compile</button>
-                      <button type="button" class="btn btn-default dropdown-toggle" id="selector" data-toggle="dropdown">
-                        <span class="caret"></span>
-                        <span class="sr-only">Toggle Dropdown</span>
-                      </button>
-                      <ul class="dropdown-menu" role="menu">
+                    <button type="button" class="btn btn-default" id="compile" onclick="compile()">Compile</button>
+                </div>
+		        <label class="form-control" id="result" style="height:auto;max-height:120px;min-height:34px;overflow:auto;"></label>		
+                <div class="input-group-btn">
+                    <button type="button" class="btn btn-default dropdown-toggle" id="selector" data-toggle="dropdown">Examples <span class="caret"></span></button>
+                    <ul class="dropdown-menu" role="menu">
                         <li><a href="#" onclick="init()">${name}</a></li>
                         <%block name="samples"/>
-                      </ul>
-                </div>
-		        <label class="form-control" id="result" style="height:auto;max-height:120px;min-height:34px;overflow:auto;"></label>		    
+                    </ul>
+                </div>    
 	     	</div>
 		</div>
 	</div>

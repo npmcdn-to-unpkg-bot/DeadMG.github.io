@@ -90,7 +90,7 @@ setcode('type t {\n    var := std.string;\n    var2 := "World!";\n}\nMain() {\n 
     
 <script type="text/javascript">
 function constructor_example() {
-    setcode('type t {\n    type(arg := std.string) : var := arg {}\n    var := std.string;\n    ~type() { std.cout << ", World!";\n}\nMain() {\n    local := t("Hello");\n    std.cout << local.var << local.var2;\n}', '')
+    setcode('type t {\n    type(arg := std.string) : var := arg {}\n    var := std.string;\n    ~type() { std.cout << ", World!"; }\n}\nMain() {\n    local := t("Hello");\n    std.cout << local.var;\n}', '')
 }
 function member_function_example() {
     setcode('type t {\n    var := "Hello, World!";\n    f() { return var; }\n}\nMain() {\n    local := t().f;\n    std.cout << local();\n}', '')
@@ -116,6 +116,7 @@ function base_example() {
             <p class="navbar-text navbar-right"><a class="navbar-link" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=QVSUDSKW22LEN&lc=GB&item_number=CodePuppy&currency_code=GBP&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">Donate</a></p>
             <p class="navbar-text navbar-right"><a class="navbar-link" href="http://bitbucket.org/DeadMG/wide">Source</a></p>
             <p class="navbar-text navbar-right"><a class="navbar-link" href="http://chat.stackoverflow.com/rooms/10/loungec">Chat</a></p>
+            <p class="navbar-text navbar-right"><a class="navbar-link" href="http://cpp-thenewoldthing.blogspot.co.uk/">Blog</a></p>
             <ul class="nav navbar-nav navbar-left">
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Tutorials <span class="caret"></span></a>
@@ -208,12 +209,12 @@ function base_example() {
 	    <div class="col-md-12">
 	        <div class="input-group">
                 <div class="input-group-btn">
-                      <button type="button" class="btn btn-default" id="compile" onclick="compile()">Compile</button>
-                      <button type="button" class="btn btn-default dropdown-toggle" id="selector" data-toggle="dropdown">
-                        <span class="caret"></span>
-                        <span class="sr-only">Toggle Dropdown</span>
-                      </button>
-                      <ul class="dropdown-menu" role="menu">
+                    <button type="button" class="btn btn-default" id="compile" onclick="compile()">Compile</button>
+                </div>
+		        <label class="form-control" id="result" style="height:auto;max-height:120px;min-height:34px;overflow:auto;"></label>		
+                <div class="input-group-btn">
+                    <button type="button" class="btn btn-default dropdown-toggle" id="selector" data-toggle="dropdown">Examples <span class="caret"></span></button>
+                    <ul class="dropdown-menu" role="menu">
                         <li><a href="#" onclick="init()">User Defined Types</a></li>
                         
 <li><a href="#" onclick="member_function_example()">Member Functions</a></li>
@@ -221,9 +222,8 @@ function base_example() {
 <li><a href="#" onclick="constructor_example()">Constructor and destructor</a></li>
 <li><a href="#" onclick="base_example()">C++ Base</a></li>
 
-                      </ul>
-                </div>
-		        <label class="form-control" id="result" style="height:auto;max-height:120px;min-height:34px;overflow:auto;"></label>		    
+                    </ul>
+                </div>    
 	     	</div>
 		</div>
 	</div>
@@ -239,10 +239,12 @@ function base_example() {
         <p>Wide types can define member functions. Like C++ types bound member functions are overload sets, which are objects in their own right. Wide member functions can take an explicit <code>this</code> argument. This provides
         for lvalue/rvalue overloading for member functions.</p>
         <p>Wide types can define constructors and destructors as in C++, but Wide uses the <code>type</code> keyword again, rather than the type name. Wide constructor initializer lists use <code>expression := expression</code> to 
-        initialize members. Wide will not implicitly define a copy or move constructor or assignment operator, or destructor, if any of the five are defined. Also note that unlike C++, if you do not define a move constructor, Wide 
-        will not pick the copy constructor as a move constructor.</p>
+        initialize members. Wide will not implicitly define a copy or move constructor or assignment operator, or destructor, if any of the five are defined as non-defaulted. Also note that unlike C++, if you do not define a move 
+        constructor, Wide will not pick the copy constructor as a move constructor.</p>
         <p>Wide types can have base classes and they can inherit from C++ types. They can also define dynamic member functions that override virtual functions from C++. Wide defines the constructor initializer as an expression as 
         Wide type references are expressions, such as <code>cplusplus.base</code>. Currently, there is no equivalent to virtual inheritance, and many operations on types that include virtual inheritance will crash the compiler.</p>
+        <p>Like in C++, you can default all of the five special member functions- copy constructor, move constructor, move assignment operator, copy assignment operator, and destructor. Wide follows the Rule of Zero- if you define 
+        any of these functions as non-defaulted, Wide does not generate any that were not explicitly defaulted (except destructor). This is referred to as a <code>complex</code> type.</p>
 	</div>
 </div>
 

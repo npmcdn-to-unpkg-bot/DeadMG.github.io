@@ -88,11 +88,6 @@ setcode('Main() {\n    cplusplus.std.cout << "Hello, World!";\n}', '#include <io
     $(init)
     </script>    
     
-<script type="text/javascript">
-function extra_example() {
-    setcode('Main() {\n    cplusplus.std.cout << "Mission " << "Accomplished.";\n}', '#include <iostream>')
-}
-</script>
 
 
 
@@ -104,6 +99,7 @@ function extra_example() {
             <p class="navbar-text navbar-right"><a class="navbar-link" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=QVSUDSKW22LEN&lc=GB&item_number=CodePuppy&currency_code=GBP&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">Donate</a></p>
             <p class="navbar-text navbar-right"><a class="navbar-link" href="http://bitbucket.org/DeadMG/wide">Source</a></p>
             <p class="navbar-text navbar-right"><a class="navbar-link" href="http://chat.stackoverflow.com/rooms/10/loungec">Chat</a></p>
+            <p class="navbar-text navbar-right"><a class="navbar-link" href="http://cpp-thenewoldthing.blogspot.co.uk/">Blog</a></p>
             <ul class="nav navbar-nav navbar-left">
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Tutorials <span class="caret"></span></a>
@@ -196,19 +192,17 @@ function extra_example() {
 	    <div class="col-md-12">
 	        <div class="input-group">
                 <div class="input-group-btn">
-                      <button type="button" class="btn btn-default" id="compile" onclick="compile()">Compile</button>
-                      <button type="button" class="btn btn-default dropdown-toggle" id="selector" data-toggle="dropdown">
-                        <span class="caret"></span>
-                        <span class="sr-only">Toggle Dropdown</span>
-                      </button>
-                      <ul class="dropdown-menu" role="menu">
+                    <button type="button" class="btn btn-default" id="compile" onclick="compile()">Compile</button>
+                </div>
+		        <label class="form-control" id="result" style="height:auto;max-height:120px;min-height:34px;overflow:auto;"></label>		
+                <div class="input-group-btn">
+                    <button type="button" class="btn btn-default dropdown-toggle" id="selector" data-toggle="dropdown">Examples <span class="caret"></span></button>
+                    <ul class="dropdown-menu" role="menu">
                         <li><a href="#" onclick="init()">Hello World!</a></li>
                         
-<li><a href="#" onclick="extra_example()">Chain</a></li>
 
-                      </ul>
-                </div>
-		        <label class="form-control" id="result" style="height:auto;max-height:120px;min-height:34px;overflow:auto;"></label>		    
+                    </ul>
+                </div>    
 	     	</div>
 		</div>
 	</div>
@@ -221,9 +215,8 @@ function extra_example() {
     <div class="col-md-12">
         <p>The Main function defines the code invoked at the beginning of every Wide program. Since Wide does not yet have its own Standard library for I/O, we will simply invoke C++'s. The cplusplus identifier provided by the web
         interface is a C++ namespace- the global namespace of the C++ code on the right. When we access a member of a namspace, this refers to the corresponding member of that namespace in that translation unit. Once we have looked
-        up ::std::cout,	then we can use the << operator, just as in C++. Interoperating with C++ is both a core motivation for Wide's existence and a key skill in the early stages. We'll take a look at Wide's other C++ 
-        interoperation features after a brief tour of the very basics of Wide.</p>
-        <p>Click on the dropdown next to "Compile" to select examples.</p>
+        up <code>::std::cout</code>	then we can use <code>operator<<</code>, just as in C++. Interoperating with C++ is both a core motivation for Wide's existence and a key skill in the early stages. We'll take a look at Wide's 
+        other C++ interoperation features after a brief tour of the very basics of Wide.</p>
 	</div>
 </div>
 

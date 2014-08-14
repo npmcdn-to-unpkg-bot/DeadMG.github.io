@@ -107,6 +107,7 @@ function conversion_example() {
             <p class="navbar-text navbar-right"><a class="navbar-link" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=QVSUDSKW22LEN&lc=GB&item_number=CodePuppy&currency_code=GBP&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">Donate</a></p>
             <p class="navbar-text navbar-right"><a class="navbar-link" href="http://bitbucket.org/DeadMG/wide">Source</a></p>
             <p class="navbar-text navbar-right"><a class="navbar-link" href="http://chat.stackoverflow.com/rooms/10/loungec">Chat</a></p>
+            <p class="navbar-text navbar-right"><a class="navbar-link" href="http://cpp-thenewoldthing.blogspot.co.uk/">Blog</a></p>
             <ul class="nav navbar-nav navbar-left">
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Tutorials <span class="caret"></span></a>
@@ -199,20 +200,19 @@ function conversion_example() {
 	    <div class="col-md-12">
 	        <div class="input-group">
                 <div class="input-group-btn">
-                      <button type="button" class="btn btn-default" id="compile" onclick="compile()">Compile</button>
-                      <button type="button" class="btn btn-default dropdown-toggle" id="selector" data-toggle="dropdown">
-                        <span class="caret"></span>
-                        <span class="sr-only">Toggle Dropdown</span>
-                      </button>
-                      <ul class="dropdown-menu" role="menu">
+                    <button type="button" class="btn btn-default" id="compile" onclick="compile()">Compile</button>
+                </div>
+		        <label class="form-control" id="result" style="height:auto;max-height:120px;min-height:34px;overflow:auto;"></label>		
+                <div class="input-group-btn">
+                    <button type="button" class="btn btn-default dropdown-toggle" id="selector" data-toggle="dropdown">Examples <span class="caret"></span></button>
+                    <ul class="dropdown-menu" role="menu">
                         <li><a href="#" onclick="init()">Templates</a></li>
                         
 <li><a href="#" onclick="function_example()">Functions</a></li>
 <li><a href="#" onclick="conversion_example()">UDT conversion</a></li>
 
-                      </ul>
-                </div>
-		        <label class="form-control" id="result" style="height:auto;max-height:120px;min-height:34px;overflow:auto;"></label>		    
+                    </ul>
+                </div>    
 	     	</div>
 		</div>
 	</div>

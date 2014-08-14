@@ -94,8 +94,13 @@ function generic_example() {
 }
 function inference_example() {
     setcode(
-        'f(x := bool) {\n    if (x) return cplusplus.std.string("Hello, World!");\n    return "Epic fail.";\n}\nMain() {\n    result := f(true);\n        cplusplus.std.cout << result;\n}',
+        'f(x := bool) {\n    if (x) return cplusplus.std.string("Hello, World!");\n    return "Epic fail.";\n}\nMain() {\n    result := f(true);\n    cplusplus.std.cout << result;\n}',
         '#include <iostream>\n#include <string>\n'
+    );
+}
+function delete_example() {
+    setcode(
+        'f(x := int32) delete\nf(x := int64) { return "Hello, World!"; }\nMain() {\n    std.cout << f(int32(5));\n}', ''
     );
 }
 </script>
@@ -110,6 +115,7 @@ function inference_example() {
             <p class="navbar-text navbar-right"><a class="navbar-link" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=QVSUDSKW22LEN&lc=GB&item_number=CodePuppy&currency_code=GBP&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">Donate</a></p>
             <p class="navbar-text navbar-right"><a class="navbar-link" href="http://bitbucket.org/DeadMG/wide">Source</a></p>
             <p class="navbar-text navbar-right"><a class="navbar-link" href="http://chat.stackoverflow.com/rooms/10/loungec">Chat</a></p>
+            <p class="navbar-text navbar-right"><a class="navbar-link" href="http://cpp-thenewoldthing.blogspot.co.uk/">Blog</a></p>
             <ul class="nav navbar-nav navbar-left">
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Tutorials <span class="caret"></span></a>
@@ -202,20 +208,20 @@ function inference_example() {
 	    <div class="col-md-12">
 	        <div class="input-group">
                 <div class="input-group-btn">
-                      <button type="button" class="btn btn-default" id="compile" onclick="compile()">Compile</button>
-                      <button type="button" class="btn btn-default dropdown-toggle" id="selector" data-toggle="dropdown">
-                        <span class="caret"></span>
-                        <span class="sr-only">Toggle Dropdown</span>
-                      </button>
-                      <ul class="dropdown-menu" role="menu">
+                    <button type="button" class="btn btn-default" id="compile" onclick="compile()">Compile</button>
+                </div>
+		        <label class="form-control" id="result" style="height:auto;max-height:120px;min-height:34px;overflow:auto;"></label>		
+                <div class="input-group-btn">
+                    <button type="button" class="btn btn-default dropdown-toggle" id="selector" data-toggle="dropdown">Examples <span class="caret"></span></button>
+                    <ul class="dropdown-menu" role="menu">
                         <li><a href="#" onclick="init()">Functions</a></li>
                         
 <li><a href="#" onclick="inference_example()">Return Type Inference</a></li>
 <li><a href="#" onclick="generic_example()">Duck-typed arguments</a></li>
+<li><a href="#" onclick="delete_example()">Delete</a></li>
 
-                      </ul>
-                </div>
-		        <label class="form-control" id="result" style="height:auto;max-height:120px;min-height:34px;overflow:auto;"></label>		    
+                    </ul>
+                </div>    
 	     	</div>
 		</div>
 	</div>
@@ -226,14 +232,15 @@ function inference_example() {
 
 <div class="row">
     <div class="col-md-12">
-        <p>Functions in Wide are defined by a simple identifier, arguments, then body. The return type may be left off for an inferred return type, as in Main, or it may be made explicit, like f. Return type inference in Wide is 
-        substantially more useful than it's C++ counterpart, because Wide does not have the problem of not being able to infer return types of functions in other translation units. In addition, Wide can infer return types in 
-        recursive functions in a much wider range of circumstances, and can infer the return type when the types are related instead of identical. Most Wide functions that do not have to adhere to a contract should not require an 
-        explicit return type.</p>
-        <p>Main can have a return type of void, in which case it implicitly returns 0 to the operating system, or it can return int.</p>
+        <p>Functions in Wide are defined by a simple identifier, arguments, then body. The return type may be left off for an inferred return type, as in Main, or it may be made explicit, like <code>f</code>. Return type inference 
+        in Wide is substantially more useful than its C++ counterpart, because Wide does not have the problem of not being able to infer return types of functions in other translation units. In addition, Wide can infer return types
+        in recursive functions in a much wider range of circumstances, and can infer the return type when the types are related instead of identical. Most Wide functions that do not have to adhere to a contract should not require 
+        an explicit return type.</p>
         <p>Wide also has duck-typed functions. You can create a duck-typed argument by simply leaving off the type initializer for that argument. Wide will accept absolutely anything for these arguments. Using <code>.</code> to 
         access members of namespaces as well as objects is not simply a case of syntax re-use- namespace objects are values too and respond to the same member access semantics.</p>   
-        <p>Wide currently has no facilities for named parameters, but they are planned.</p>        
+        <p>Wide currently has no facilities for named parameters, but they are planned.</p>
+        <p>Wide can <code>delete</code> functions. This presents as a general OR failure, not a hard failure. Normally an <code>int32</code> implicitly converts to an <code>int64</code>, but instead overload resolution picks the 
+        first function, which was deleted. The OR failure error message is not as helpful as it could be right now.</p>
 	</div>
 </div>
 

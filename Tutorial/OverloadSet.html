@@ -92,6 +92,9 @@
 function bound_example() {
     setcode('Main() {\n    local := cplusplus.f;\n    c_string := local().c_str;\n    cplusplus.std.cout << c_string();\n}', '#include <iostream>\n#include <string>\nstd::string f() { return "Hello, World!"; }')
 }
+function primitive_example() {
+    setcode('Main() {\n    local := false;\n    ass := local.operator=;\n    ass(true);\n    if (local) cplusplus.std.cout << cplusplus.f();\n}', '#include <iostream>\n#include <string>\nstd::string f() { return "Hello, World!"; }')
+}
 </script>
 
 
@@ -104,6 +107,7 @@ function bound_example() {
             <p class="navbar-text navbar-right"><a class="navbar-link" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=QVSUDSKW22LEN&lc=GB&item_number=CodePuppy&currency_code=GBP&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">Donate</a></p>
             <p class="navbar-text navbar-right"><a class="navbar-link" href="http://bitbucket.org/DeadMG/wide">Source</a></p>
             <p class="navbar-text navbar-right"><a class="navbar-link" href="http://chat.stackoverflow.com/rooms/10/loungec">Chat</a></p>
+            <p class="navbar-text navbar-right"><a class="navbar-link" href="http://cpp-thenewoldthing.blogspot.co.uk/">Blog</a></p>
             <ul class="nav navbar-nav navbar-left">
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Tutorials <span class="caret"></span></a>
@@ -196,19 +200,19 @@ function bound_example() {
 	    <div class="col-md-12">
 	        <div class="input-group">
                 <div class="input-group-btn">
-                      <button type="button" class="btn btn-default" id="compile" onclick="compile()">Compile</button>
-                      <button type="button" class="btn btn-default dropdown-toggle" id="selector" data-toggle="dropdown">
-                        <span class="caret"></span>
-                        <span class="sr-only">Toggle Dropdown</span>
-                      </button>
-                      <ul class="dropdown-menu" role="menu">
+                    <button type="button" class="btn btn-default" id="compile" onclick="compile()">Compile</button>
+                </div>
+		        <label class="form-control" id="result" style="height:auto;max-height:120px;min-height:34px;overflow:auto;"></label>		
+                <div class="input-group-btn">
+                    <button type="button" class="btn btn-default dropdown-toggle" id="selector" data-toggle="dropdown">Examples <span class="caret"></span></button>
+                    <ul class="dropdown-menu" role="menu">
                         <li><a href="#" onclick="init()">Overload Sets</a></li>
                         
 <li><a href="#" onclick="bound_example()">Bound sets</a></li>
+<li><a href="#" onclick="primitive_example()">Primitive bound sets</a></li>
 
-                      </ul>
-                </div>
-		        <label class="form-control" id="result" style="height:auto;max-height:120px;min-height:34px;overflow:auto;"></label>		    
+                    </ul>
+                </div>    
 	     	</div>
 		</div>
 	</div>
@@ -219,13 +223,14 @@ function bound_example() {
 
 <div class="row">
     <div class="col-md-12">
-        <p>Virtually all things you can express in Wide are considered objects. This includes the core concept of overload sets. When you use a name that resolves to one or more Wide or C++ functions, this produces an overload set
+        <p>All things you can express in Wide are considered objects. This includes the core concept of overload sets. When you use a name that resolves to one or more Wide or C++ functions, this produces an overload set
         value which we can pass around like any other, and even return from themselves or pass as arguments to themselves, if they are duck-typed. Wide overload sets can carry both Wide and C++ functions at the same time. A typical
         scenario in which this occurs is ADL for binary operators, or looking up member functions for derived types.</p>
-        <p>Currently, values of operator overload sets are produced but are not user-exposed due to limitations of the current implementation, as neither <code>operator+</code> nor <code>t.operator+</code> is legal syntax. These 
-        are set to be lifted soon.</p>
-        <p>Overload sets can also be bound. The syntax <code>t.f()</code> has no special interperation in Wide- the subexpression "t.f" must produce an object that can be called with no arguments. This directly means that member 
-        function references of both Wide types and C++ types are valid objects. Binding occurs strictly by reference, never by value. Bound overload sets remember whether they were bound to an lvalue or an rvalue.</p>
+        <p>Overload sets can also be bound. The syntax <code>t.f()</code> has no special interperation in Wide- the subexpression <code>t.f</code> must produce an object that can be called with no arguments. This directly means 
+        that member function references of both Wide types and C++ types are valid objects. Binding occurs strictly by reference, never by value. Bound overload sets remember whether they were bound to an lvalue or an rvalue.</p>
+        <p>Overload sets can also be bound to primitives. Typically primitives don't have any member functions, but they do have member operators which can be called. Here, Wide supports explicitly accessing the operator as a 
+        member, as well as plain <code>operator+</code> as an expression. Note that the overload set currently does <i>not</i> perform ADL on the arguments when invoked, unlike invoking the operator directly. Some primitive
+        operators are found through ADL. This behaviour is due to be fixed.</p>
 	</div>
 </div>
 

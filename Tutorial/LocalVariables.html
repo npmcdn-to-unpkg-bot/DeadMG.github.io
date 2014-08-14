@@ -104,6 +104,7 @@ function reference_example() {
             <p class="navbar-text navbar-right"><a class="navbar-link" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=QVSUDSKW22LEN&lc=GB&item_number=CodePuppy&currency_code=GBP&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">Donate</a></p>
             <p class="navbar-text navbar-right"><a class="navbar-link" href="http://bitbucket.org/DeadMG/wide">Source</a></p>
             <p class="navbar-text navbar-right"><a class="navbar-link" href="http://chat.stackoverflow.com/rooms/10/loungec">Chat</a></p>
+            <p class="navbar-text navbar-right"><a class="navbar-link" href="http://cpp-thenewoldthing.blogspot.co.uk/">Blog</a></p>
             <ul class="nav navbar-nav navbar-left">
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Tutorials <span class="caret"></span></a>
@@ -196,19 +197,18 @@ function reference_example() {
 	    <div class="col-md-12">
 	        <div class="input-group">
                 <div class="input-group-btn">
-                      <button type="button" class="btn btn-default" id="compile" onclick="compile()">Compile</button>
-                      <button type="button" class="btn btn-default dropdown-toggle" id="selector" data-toggle="dropdown">
-                        <span class="caret"></span>
-                        <span class="sr-only">Toggle Dropdown</span>
-                      </button>
-                      <ul class="dropdown-menu" role="menu">
+                    <button type="button" class="btn btn-default" id="compile" onclick="compile()">Compile</button>
+                </div>
+		        <label class="form-control" id="result" style="height:auto;max-height:120px;min-height:34px;overflow:auto;"></label>		
+                <div class="input-group-btn">
+                    <button type="button" class="btn btn-default dropdown-toggle" id="selector" data-toggle="dropdown">Examples <span class="caret"></span></button>
+                    <ul class="dropdown-menu" role="menu">
                         <li><a href="#" onclick="init()">Local Variables</a></li>
                         
 <li><a href="#" onclick="reference_example()">References</a></li>
 
-                      </ul>
-                </div>
-		        <label class="form-control" id="result" style="height:auto;max-height:120px;min-height:34px;overflow:auto;"></label>		    
+                    </ul>
+                </div>    
 	     	</div>
 		</div>
 	</div>
@@ -219,9 +219,9 @@ function reference_example() {
 
 <div class="row">
     <div class="col-md-12">
-        <p>Local variables in Wide are introduced with <code>:=</code>. They are always initialized by calling the constructor. You can explicitly call the constructor as a function, like C++. The type is deduced from the 
-        initializing expression. Wide always deduces a value, like <code>auto</code> in C++, unless you explicitly construct an object of a type, in which case the local will always have that type, even if it's a reference. Local 
-        variables in Wide are subject to the same rules of destruction as those in C++. The lifetime of temporaries, however, was expanded to the whole scope.</p>
+        <p>Local variables in Wide are introduced with <code>:=</code>. They are always initialized by calling the constructor- there is no zero-initialization, default-initialization, etc. The type is deduced from the initializing 
+        expression. Wide always deduces a value, like <code>auto</code> in C++, unless you explicitly construct an object of a type, in which case the local will always have that type, even if it's a reference. Local variables in Wide 
+        are subject to the same rules of destruction as those in C++. The lifetime of temporaries, however, was expanded to the whole scope.</p>
         <p>The basic notion of references is familiar to you from C++. Instead of a special syntax for denoting a reference, we access a named member of a type. Wide offers both lvalue and rvalue references. Unlike in C++, Wide 
         references are real objects with a size and alignment, so they're more suitable for generic code, and in addition, you can refer to lvalue references (referring to rvalue references is a work in progress). In addition,
         Wide indicates value category exclusively through the type system- so all lvalues are lvalue references. Calling a type's constructor can be done explicitly by simply calling that type.</p>
