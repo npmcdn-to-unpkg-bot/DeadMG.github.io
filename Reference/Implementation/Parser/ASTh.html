@@ -17,7 +17,7 @@
         })();
     </script>
     
-<title>Lexer.cpp</title>
+<title>AST.h</title>
 
 </head>
 <body>
@@ -54,15 +54,15 @@
                                         <li class="dropdown-submenu">
                                         <a href="../Lexer.html">Lexer</a>
                                             <ul class="dropdown-menu">       
-                                                <li><a href="lexerh.html">Lexer.h</a></li>                                            
-                                                <li><a href="tokenh.html">Token.h</a></li>                                            
-                                                <li><a href="lexercpp.html">Lexer.cpp</a></li>                                            
+                                                <li><a href="../Lexer/lexerh.html">Lexer.h</a></li>                                            
+                                                <li><a href="../Lexer/tokenh.html">Token.h</a></li>                                            
+                                                <li><a href="../Lexer/lexercpp.html">Lexer.cpp</a></li>                                            
                                             </ul>
                                         </li>        
                                         <li class="dropdown-submenu">
                                         <a href="../Parser.html">Parser</a>
                                             <ul class="dropdown-menu">       
-                                                <li><a href="../Parser/ASTh.html">AST.h</a></li>                                            
+                                                <li><a href="ASTh.html">AST.h</a></li>                                            
                                             </ul>
                                         </li>        
                                         <li><a href="../Analyzer.html">Analyzer</a></li>
@@ -109,47 +109,32 @@
 
 <div class="jumbotron">
     <div class="container">
-        <h1>Private lexer implementation</h1>
+        <h1>AST structure</h1>
     </div>
 </div>
 <div class="container">
-    <p>The Invocation class implements the <a href="lexerh.html">Lexer interface</a> and the <a href="../../Syntax/Lexical.html">
-    lexical specification</a>. Internally, the Invocation class also stores three member variables.</p>
-    <table class="table">
+    <p>All structures for the Wide AST are listed in the namespace <code>Wide::Parse</code>. The Wide AST is a fairly plain tree structure. It uses non-owning references to connect the leaves. The creator is responsible for owning 
+    the elements- in the case of parsed elements, they are owned by the Parser. Every AST element holds a record of the location it came from. Like in the lexer, filenames and locations are never inspected except to print them out 
+    for error locations. Each AST node has a constructor detailing what elements are required to construct it. The AST does not record some forms guaranteed to be equal- for example, the AST does not record whether the short or 
+    long form was used to define a function or type. AST node pointers are guaranteed to be non-null, except where the grammar permits the user to choose between multiple forms. These are recorded below:</p>
+    <table clas="table">
         <colgroup><col class="col-md-1"></col><col class="col-md-7"></col></colgroup>
-        <tr><th>Member</th><th>Function</th></tr>
-        <tr><td>r</td><td>A copy of the input range as a std::function.</td></tr>
-        <tr><td>current_position</td><td>The current location. Used for calculating the locations of tokens.</td></tr>
-        <tr><td>putback</td><td>A container of characters and locations which have been "put back". This refers to reading input that turns out not to be part of the current token. When this occurs, the input is "put back", to be 
-        read again in the future as if it was never read. This allows lexer routines to look ahead to the next N (arbitrary) characters when deciding what to do with the current character. Input that was put back should be put 
-        back in the inverse order it was read in to be read out in the correct order.</td></tr>
+        <tr><th>Node type</th><th>Notes</th></tr>
+        <tr><td>While</td><td>Represents a while statement. Either <code>condition</code> or <code>var_condition</code> will be null. If var_condition is non-null, then the user used the form <code>while(var := condition)</code>, 
+        else they used a plain expression.</td></tr>
+        <tr><td>If</td><td>Represents an if statement. The false_statement node may be null if the user did not create an else branch. condition or var_condition will be null depending on form, as with while.</td></tr>
+        <tr><td>Throw</td><td>Throw may have no expression, in which case it corresponds to rethrow.</td></tr>
+        <tr><td>Return</td><td>Return may have no expression, in which case it corresponds to a void return.</td></tr>
+        <tr><td>FunctionArgument</td><td>May have no type expression.</td></tr>
+        <tr><td>Function</td><td>May have no explicit return. Some members like the list of statements of the body are meaningless when some other members, like defaulted or deleted, are set.</td></tr>
+        <tr><td>Catch</td><td>May not have a type expression. This corresponds to a catch-all. The constructors set the "all" member appropriately.</td></tr>
     </table>
-    <p>Briefly, the implementation of both private and public member functions is described here. All five special members have defaulted implementations.</p>
-    <table class="table">
-        <colgroup><col class="col-md-1"></col><col class="col-md-7"></col></colgroup>
-        <tr><th>Member</th><th>Function</th></tr>
-        <tr><td>Constructor</td><td>Stores the initial position and passed range. Also initializes the public members to their default values.</td></tr>
-        <tr><td>escape</td><td>Processes strings looking for escapes to substitute based on a simple linear search.</td></tr>
-        <tr><td>ParseCComments</td><td>Invoked to handle multi-line comments. This used to be recursive but no longer is. May be due for removal as a separate method.</td></tr>
-        <tr><td>get</td><td>Gets the next character from the input. Returns the empty optional if there was no more input. If there were any put-back characters, the routine picks them first. It also mutates the current position 
-        to reflect the current position of the new character.</td></tr>
-    </table>
-    <p>operator() performs the meat of the real work. It consumes the next character from the input. If there is no next character, then the empty optional is returned. Else, it attempts to classify it in the following ways:</p>
-    <table class="table">
-        <colgroup><col class="col-md-1"></col><col class="col-md-7"></col></colgroup>
-        <tr><th>Type</th><th>Matches</th></tr>
-        <tr><td>Whitespace</td><td>This is matched if the character is found in the whitespace member set. If so, it simply recurses to start again from the next character.</td></tr>
-        <tr><td>Comment</td><td>This is matched if // or /* is found. If a comment is found then the operator recurses to get the next token after the comment.</td></tr>
-        <tr><td>Triples</td><td>If possible, the next two characters are checked to see whether they combine with the current one to form a valid triple.</td></tr>
-        <tr><td>Doubles</td><td>If possible, the next character is checked to see whether it forms a valid double with the current character.</td></tr>
-        <tr><td>Singles</td><td>If the current character is found in singles, then a token of that type is returned.</td></tr>
-        <tr><td>String</td><td>If the current character is ", then the lexer consumes all until " is found. Escapes are checked only for escaped double quotes. An error is raised if the string literal is unterminated.</td></tr>
-     </table>
-     <p>If none of these are matched, and the input is @, then all input is consumed until a non-identifier character is found. This input (excluding @) is returned as an identifier. Else, all input until a non-identifier character 
-     is consumed. If there was no such input because the starting character is not in that category and didn't match any of the above, an error is issued. Else, it is classified as a keyword if the contents are found in the keywords
-     member. Else, if there are any non-numeric characters in the input, then it is an identifier. Else, it is an integer.</p>
-     <p>This source file also defines the constants used to fill out the members by default, the definitions of the pre-provided token types, and the Token functions which are not implemented in the header.</p>
+    <br/>
+    <p>The AST Combiner takes several AST modules and presents them as a single unified AST. This allows for unified analysis of several sources (typically, several parsed files). The Combiner may own some but not all elements of 
+    the resulting unified AST. The current implementation creates and owns modules, and it keeps a reference to all AST nodes it unifies. The Combiner is mutable and can add or remove a single source at a time for incremental
+    re-unification. Simply default-construct a combiner, add the modules you need to present as a unified source, and then use GetGlobalModule to get back the root module of the combined AST.</p>
 </div>
+
     <div class="container">
         <div class="row">	
 	        <footer>&copy; Puppy 2014 <a href="http://coliru.stacked-crooked.com">Compilation services provided by Coliru.</a></footer>

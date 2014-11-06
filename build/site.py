@@ -54,7 +54,16 @@ reference = [
                      ),
                  ]
             ),
-            (os.path.join(datadir, 'Reference/Implementation/Parser.html'), 'Parser', []),
+            (
+                os.path.join(datadir, 'Reference/Implementation/Parser.html'), 
+                'Parser', 
+                [
+                    (
+                        os.path.join(datadir, 'Reference/Implementation/Parser/ASTh.html'),
+                        'AST.h'
+                    ),
+                ]
+            ),
             (os.path.join(datadir, 'Reference/Implementation/Analyzer.html'), 'Analyzer', []),
             (os.path.join(datadir, 'Reference/Implementation/CAPI.html'), 'CAPI', []),
             (os.path.join(datadir, 'Reference/Implementation/CLI.html'), 'CLI', []),

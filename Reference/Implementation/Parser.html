@@ -59,7 +59,12 @@
                                                 <li><a href="Lexer/lexercpp.html">Lexer.cpp</a></li>                                            
                                             </ul>
                                         </li>        
-                                        <li><a href="Parser.html">Parser</a></li>
+                                        <li class="dropdown-submenu">
+                                        <a href="Parser.html">Parser</a>
+                                            <ul class="dropdown-menu">       
+                                                <li><a href="Parser/ASTh.html">AST.h</a></li>                                            
+                                            </ul>
+                                        </li>        
                                         <li><a href="Analyzer.html">Analyzer</a></li>
                                         <li><a href="CAPI.html">CAPI</a></li>
                                         <li><a href="CLI.html">CLI</a></li>
@@ -102,7 +107,15 @@
     </nav>
     
 
-
+<div class="jumbotron">
+    <div class="container">
+        <h1>Parser library</h1>
+    </div>
+</div>
+<div class="container">
+    <div>The Wide parser library parses a <a href="Util/Ranges.html">range</a> of <a href="Lexer/tokenh.html">tokens
+    </a> into an <a href="Parser/ASTh.html">AST</a>. Error handling is achieved by throwing an exception. 
+</div>
     <div class="container">
         <div class="row">	
 	        <footer>&copy; Puppy 2014 <a href="http://coliru.stacked-crooked.com">Compilation services provided by Coliru.</a></footer>
