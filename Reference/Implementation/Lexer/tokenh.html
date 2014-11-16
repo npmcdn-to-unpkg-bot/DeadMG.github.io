@@ -25,9 +25,10 @@
         <div class="container"style="padding:0px;">
             <p class="navbar-text navbar-right"><a class="navbar-link" href="../../../index.html">Home</a></p>
             <p class="navbar-text navbar-right"><a class="navbar-link" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=QVSUDSKW22LEN&lc=GB&item_number=CodePuppy&currency_code=GBP&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">Donate</a></p>
-            <p class="navbar-text navbar-right"><a class="navbar-link" href="http://bitbucket.org/DeadMG/wide">Source</a></p>
+            <p class="navbar-text navbar-right"><a class="navbar-link" href="http://github.com/DeadMG/Wide">Source</a></p>
             <p class="navbar-text navbar-right"><a class="navbar-link" href="http://chat.stackoverflow.com/rooms/10/loungec">Chat</a></p>
             <p class="navbar-text navbar-right"><a class="navbar-link" href="http://cpp-thenewoldthing.blogspot.co.uk/">Blog</a></p>
+            <p class="navbar-text navbar-right"><a class="navbar-link" href="https://trello.com/b/xlk0vyH2/wide">Trello</a></p>
             <ul class="nav navbar-nav navbar-left">
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Tutorials <span class="caret"></span></a>
@@ -123,7 +124,7 @@
         them to the lexer's data structures. The default token types are in a TokenTypes subnamespace, e.g. const std::string Wide::Lexer::TokenTypes::OpenBracket.</td></tr>
         <tr><td>Position</td><td>Represents a location in a source file. Must be constructed with a <code>std::shared_ptr&lt;std::string&gt;</code> that represents the filename. Note that Wide does not require this to actually be a
         filename on the hard disk- it is only ever de-referenced for diagnostics, so it should never be null, but else can be anything. Position also contains a line, column, and offset, and before/after functions. Adding two 
-        Positions produces a Range.</td></tr>
+        Positions produces a Range. The offset is primarily to represent a position in a hypothetical buffer holding the characters of the source file to make it easier to locate.</td></tr>
         <tr><td>Range</td><td>Immutable. Represents a range of characters in the input. Can be constructed from a <code>std::shared_ptr&lt;std::string&gt;</code>, or a single Position, or a pair of Positions. Provides operator+ to
         create one range that includes both of the source ranges and any space between.</td></tr>
         <tr><td>to_string, operator+</td><td>Overloads of operator+ and to_string are provided here. You can concatenate a Position or Range with a string, and call to_string(pos) or to_string(range).</td></tr>
