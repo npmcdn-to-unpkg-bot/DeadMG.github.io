@@ -7,10 +7,62 @@ function escapeRegExp(string) {
 function getServerFilePath(id) {
     return "/Archive2/" + id.substr(0, 2) + "/" + id.substr(2, id.length).trim() + "/main.cpp";
 }
-var dom = React.DOM;
 
+var dom = React.DOM;
 var Router = React.createFactory(ReactRouter.Router);
 var Link = React.createFactory(ReactRouter.Link);
+
+var BuildDependencies = [
+    { name: "Boost", notes: function() { return "Must be at least v1.58. Must include Boost.ProgramOptions, which is not header-only." } },
+    { name: "LLVM/Clang", notes: function() { return "Must be v3.6. Must be compiled with RTTI on Linux. Must be compiled without asserts." } },
+    { name: "Premake", notes: function() { return dom.span(null, "Must be Premake 4.4. Packages available on Linux, for Windows see ", dom.a({ href: "https://bitbucket.org/DeadMG/wide/downloads/premake4.exe" }, "here"), ".") } },
+    { name: "zlib", notes: function() { } },
+    { name: "libarchive", notes: function() { } },
+    { name: "Host toolchain", notes: function() { return "Wide uses RTTI and exceptions. Wide makes some use of C++11/14. Wide requires MSVC2015, Clang 3.6, or G++ 5.2 or later."; } }
+];
+
+var ExecutionDependencies = [
+    { name: "Standard library", notes: function() { return "Wide requires an Itanium-ABI Standard library and runtime support libraries. libstdc++ is supported, libc++ is theoretically supported but untested. On Windows, MinGW is required. It must be version >=4.8. Wide can automatically find the include path directories."; } },
+    { name: "Wide stdlib", notes: function() { return "Wide expects to find it's own runtime library packaged relative to either the executable or the working directory."; } }
+]
+
+var Reference = [
+    { 
+        name: "Building", 
+        render: function() {
+            return dom.div(null,
+                dom.h1(null, "Building Wide"),
+                dom.table(null,
+                    dom.tbody(null, 
+                        dom.tr(null,
+                            dom.th(null, "Build Dependency"),
+                            dom.th(null, "Notes")
+                        ),
+                        _.map(BuildDependencies, dep => {
+                            return dom.tr({ key: dep.name },
+                                dom.td(null, dep.name),
+                                dom.td(null, dep.notes()));
+                        }))
+                ),
+                dom.h1(null, "Running Wide"),
+                dom.table(null,
+                    dom.tbody(null, 
+                        dom.tr(null,
+                            dom.th(null, "Execution Dependency"),
+                            dom.th(null, "Notes")
+                        ),
+                        _.map(ExecutionDependencies, dep => {
+                            return dom.tr({ key: dep.name },
+                                dom.td(null, dep.name),
+                                dom.td(null, dep.notes()));
+                        }))
+                ),
+                dom.p(null, "To build Wide on Linux systems, pre-defined scripts are provided. Reference Wide/Tools/version to use them. Currently Ubuntu 12.04 and 15.10 have install-deps and build scripts provided. There is also a test script and a package script. For other Linux distros, reference these files as a starting point - it should be enough to install the deps from your favourite package manager, and then run premake and make."),
+                dom.p(null, "To build Wide on Windows, more fun is required. Premake can generate VS2010 projects which can be trivially upgraded to VS2015. As for the deps, you will have to build them yourself and figure out exactly how to reference them. TODO: Document this properly.")
+            )    
+        }
+    }
+]
 
 var Caret = React.createFactory(React.createClass({
     render: function() {
@@ -25,6 +77,7 @@ var Caret = React.createFactory(React.createClass({
         }});
     }
 }));
+
 var DropdownMenu = React.createFactory(React.createClass({
     onHeaderClick: function() {
         this.setState({ renderList: !this.state.renderList });
@@ -36,7 +89,7 @@ var DropdownMenu = React.createFactory(React.createClass({
     },
     render: function() {
         return dom.div(null,
-            dom.div({ onClick: this.onHeaderClick }, this.props.text, Caret()), 
+            dom.div({ onClick: this.onHeaderClick, style: { cursor: "pointer" } }, this.props.text, Caret()), 
             this.renderList()
         );
     },
@@ -50,9 +103,19 @@ var DropdownMenu = React.createFactory(React.createClass({
             left: "0",
             zIndex: "3",
             background: "white",
-            border: "1px solid black"
+            borderTop: "0",
+            border: "1px solid black",
+            color: "black",
+            marginTop: "-1px"
         }
-        return dom.div({ style: listStyle }, this.props.children);        
+        return dom.div({ style: listStyle }, React.Children.map(this.props.children, (child, index) => new DropdownItem({ key: index }, child)));        
+    }
+}));
+
+var DropdownItem = React.createFactory(React.createClass({
+    render: function() {
+        return dom.div({ style: { paddingLeft: largePadding, paddingRight: largePadding, paddingTop: smallPadding, paddingBottom: smallPadding }, className: "navitem" },
+            this.props.children);
     }
 }));
 
@@ -64,7 +127,8 @@ var NavItem = React.createFactory(React.createClass({
             position: "relative",
             height: "100%",
             display: "flex",
-            alignItems: "center"
+            alignItems: "center",
+            color: "#777"            
 		};
 		return dom.div({ style: item }, this.props.children);
 	}
@@ -84,7 +148,7 @@ var NavBar = React.createFactory(React.createClass({
 			flexGrow: "1",
 			color: "#777"
 		};
-		return dom.div({ style: navBarStyle },
+		return dom.div({ style: navBarStyle, className: "navbar" },
 		    dom.div({ style: innerNavBarStyle }, 
 	            this.renderLeftSide(),
 			    this.renderRightSide()
@@ -97,7 +161,7 @@ var NavBar = React.createFactory(React.createClass({
 		};
 		return dom.div({ style: leftStyle }, 
 		    NavItem(null, DropdownMenu({ text: "Tutorials" }, "Item1", "Item2")),
-			NavItem(null, DropdownMenu({ text: "Reference" }, "Item1", "Item2"))
+			NavItem(null, DropdownMenu({ text: "Reference" }, _.map(Reference, item => new Link({ key: item.name, to: 'Reference/' + item.name }, item.name))))
 	    );
 	},
 	renderRightSide: function() {
@@ -107,11 +171,11 @@ var NavBar = React.createFactory(React.createClass({
             height: "100%"
 		};
 		return dom.div({ style: rightStyle }, 
-		    NavItem(null, "Trello"),
-			NavItem(null, Link({ to: "/Blog" }, "Blog")),
-			NavItem(null, "Chat"),
-			NavItem(null, "Source"),
-			NavItem(null, "Donate"),
+		    //NavItem(null, "Trello"),
+			//NavItem(null, Link({ to: "/Blog" }, "Blog")),
+			//NavItem(null, "Chat"),
+			NavItem(null, dom.a({ href: "https://github.com/DeadMG/Wide" }, "Source")),
+			//NavItem(null, "Donate"),
 			NavItem(null, Link({ to: "/" }, "Home"))
 	    );
 	}
@@ -385,11 +449,19 @@ var Sample = React.createClass({
     }
 });
 
+var ReferencePage = React.createClass({
+    render: function() {
+        return dom.div({ style: { paddingLeft: largePadding, paddingBottom: largePadding } }, 
+            _.find(Reference, item => item.name == this.props.params.name).render());
+    }
+})
+
 const routes = {
   component: App,
   childRoutes: [
     { path: 'Sample/:sampleId', component: Sample },
     { path: 'Blog', component: Blog },
+    { path: 'Reference/:name', component: ReferencePage },
     { path: '/', component: Home }
   ]
 };

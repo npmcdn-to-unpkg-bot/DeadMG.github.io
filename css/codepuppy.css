@@ -1,10 +1,22 @@
-.app a:link {
+.navbar a:link {
   text-decoration: none;
 }
-.app a:visited  {
+.navbar a:visited  {
   color: #777;
 }
-.app a:hover {
+.navbar a:hover {
   color: white;
+  text-decoration: underline;
+}
+
+.navitem a:link {
+  text-decoration: none;
+  color: #337AB7;
+}
+.navitem a:visited  {
+  color: #777;
+}
+.navitem a:hover {
+  color: #23527C;
   text-decoration: underline;
 }
