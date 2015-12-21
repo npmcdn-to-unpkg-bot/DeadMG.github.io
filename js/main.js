@@ -20,7 +20,7 @@ var BuildDependencies = [
     { name: "Premake", notes: function() { return dom.span(null, "Must be Premake 4.4. Packages available on Linux, for Windows see ", dom.a({ href: "https://bitbucket.org/DeadMG/wide/downloads/premake4.exe" }, "here"), ".") } },
     { name: "zlib", notes: function() { } },
     { name: "libarchive", notes: function() { } },
-    { name: "Host toolchain", notes: function() { return "Wide uses RTTI and exceptions. Wide makes some use of C++11/14. Wide requires MSVC2015, Clang 3.6, or G++ 5.2 or later."; } }
+    { name: "Host toolchain", notes: function() { return "Wide uses RTTI and exceptions. Wide makes some use of C++11/14. Wide requires MSVC2015, Clang 3.6, or G++ 4.9 or later."; } }
 ];
 
 var ExecutionDependencies = [
