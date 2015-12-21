@@ -8,6 +8,8 @@ function getServerFilePath(id) {
     return "/Archive2/" + id.substr(0, 2) + "/" + id.substr(2, id.length).trim() + "/main.cpp";
 }
 
+var largePadding = "16px";
+var smallPadding = "5px";
 var dom = React.DOM;
 var Router = React.createFactory(ReactRouter.Router);
 var Link = React.createFactory(ReactRouter.Link);
@@ -181,8 +183,11 @@ var NavBar = React.createFactory(React.createClass({
 	}
 }));
 
-var largePadding = "16px";
-var smallPadding = "5px";
+var LoadingSpinner = React.createFactory(React.createClass({
+    render: function() {
+        return dom.div({ className: "spinner-loader" });
+    }
+}))
 
 var Playground = React.createFactory(React.createClass({
     getInitialState: function() {
@@ -191,7 +196,8 @@ var Playground = React.createFactory(React.createClass({
                 { name: "HelloWorld.wide", source: "Main() {\n    std.cout << \"Hello, World!\";\n}", type: "wide" },
                 { name: "main.cpp", source: "#include <iostream>", type: "cpp" },
             ],
-            currentFile: this.props.files ? this.props.files[0].name : "HelloWorld.wide"
+            currentFile: this.props.files ? this.props.files[0].name : "HelloWorld.wide",
+            requesting: false
         };
     },
     render: function() {
@@ -228,7 +234,7 @@ var Playground = React.createFactory(React.createClass({
             return this.state.results;
         return dom.div({ style: { paddingLeft: largePadding }},
             dom.div(null, this.props.helpText),
-            dom.div(null, this.state.results));
+            dom.div(null, this.state.requesting ? LoadingSpinner() : this.state.results));
     },
     renderTreeView: function() {
         return dom.div({
@@ -350,6 +356,7 @@ var Playground = React.createFactory(React.createClass({
         }));        
     },
     compile: function() {
+        this.setState({ requesting: true });
         var wideRequests = this.sendFiles(file => file.type == "wide");
         var cppRequests = this.sendFiles(file => file.type == "cpp");
         var _this = this;
@@ -374,13 +381,13 @@ var Playground = React.createFactory(React.createClass({
                         cmd: "/usr/local/bin/Wide/Wide main.cpp " + _.reduce(wideLocations, (location, current) => current += location, "") + " && g++ a.o && ./a.out"
                     })
                 }).then(result => {
-                    _this.setState({ results: replaceAll("'x86_64' is not a recognized processor for this target (ignoring processor)", "", result) });
+                    _this.setState({ results: replaceAll("'x86_64' is not a recognized processor for this target (ignoring processor)", "", result), requesting: false });
                 });             
             });
         });
     },
     componentDidMount: function() {
-        this.compile();
+        this.props.files && this.compile();
     },
     share: function() {
         var json = JSON.stringify(this.state);
