@@ -4,7 +4,9 @@ function replaceAll(find, replace, str) {
 function escapeRegExp(string) {
     return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
 }
-
+function getServerFilePath(id) {
+    return "/Archive2/" + id.substr(0, 2) + "/" + id.substr(2, id.length).trim() + "/main.cpp";
+}
 var dom = React.DOM;
 
 var Router = React.createFactory(ReactRouter.Router);
@@ -121,11 +123,11 @@ var smallPadding = "5px";
 var Playground = React.createFactory(React.createClass({
     getInitialState: function() {
         return {
-            files: [
-                { name: "HelloWorld.wide", source: "Main() {\n    cplusplus.std.cout << \"Hello, World!\";\n}", type: "wide" },
+            files: this.props.files || [
+                { name: "HelloWorld.wide", source: "Main() {\n    std.cout << \"Hello, World!\";\n}", type: "wide" },
                 { name: "main.cpp", source: "#include <iostream>", type: "cpp" },
             ],
-            currentFile: "HelloWorld.wide"
+            currentFile: this.props.files ? this.props.files[0].name : "HelloWorld.wide"
         };
     },
     render: function() {
@@ -152,13 +154,17 @@ var Playground = React.createFactory(React.createClass({
     renderHeaderButtons: function() {
         return dom.div({ style: { marginBottom: largePadding, marginTop: "0", display: "flex" } },
             this.renderHeaderButton(dom.button({ onClick: () => this.compile() }, "Compile")),
-            this.renderHeaderButton(dom.button({ onClick: () => {} }, "Share")));
+            this.renderHeaderButton(dom.button({ onClick: () => this.share() }, "Share")));
     },
     renderHeaderButton: function(button) {
         return dom.div({ style: { marginLeft: largePadding } }, button);  
     },
     renderResults: function() {
-        return this.state.results;
+        if (!this.props.helpText)
+            return this.state.results;
+        return dom.div({ style: { paddingLeft: largePadding }},
+            dom.div(null, this.props.helpText),
+            dom.div(null, this.state.results));
     },
     renderTreeView: function() {
         return dom.div({
@@ -282,12 +288,13 @@ var Playground = React.createFactory(React.createClass({
     compile: function() {
         var wideRequests = this.sendFiles(file => file.type == "wide");
         var cppRequests = this.sendFiles(file => file.type == "cpp");
-        jQuery.when(...wideRequests).done(() => {
-            var wideResults = _.filter(arguments, (value, index) => index % 3 == 0);
-            jQuery.when(...cppRequests).done(() => {
-                var cppResults = _.filter(arguments, (value, index) => index % 3 == 0);
-                var wideLocations = _.map(wideResults, http => "/Archive2/" + http.substr(0, 2) + "/" + http.substr(2, http.length).trim() + "/main.cpp");
-                var cppLocations = _.map(cppResults, http => "/Archive2/" + http.substr(0, 2) + "/" + http.substr(2, http.length).trim() + "/main.cpp");      
+        var _this = this;
+        jQuery.when(...wideRequests).done(function() {
+            var wideResults = _.filter(Array.prototype.slice.call(arguments), (value, index) => index % 3 == 0);
+            jQuery.when(...cppRequests).done(function() {
+                var cppResults = _.filter(Array.prototype.slice.call(arguments), (value, index) => index % 3 == 0);
+                var wideLocations = _.map(wideResults, http => getServerFilePath(http));
+                var cppLocations = _.map(cppResults, http => getServerFilePath(http));      
                 var identitySrc = "Identity(x) { return Identity; } Identity() { return Identity; }";
                 var usingSrc = "using cplusplus := ";
                 if (cppLocations.length == 0) {
@@ -300,12 +307,28 @@ var Playground = React.createFactory(React.createClass({
                     contentType: "application/json",
                     data: JSON.stringify({
                         src: identitySrc + usingSrc,
-                        cmd: "/usr/local/bin/Wide/CLI main.cpp " + _.reduce(wideLocations, (location, current) => current += location, "") + " && g++ a.o && ./a.out"
+                        cmd: "/usr/local/bin/Wide/Wide main.cpp " + _.reduce(wideLocations, (location, current) => current += location, "") + " && g++ a.o && ./a.out"
                     })
                 }).then(result => {
-                    this.setState({ results: replaceAll("'x86_64' is not a recognized processor for this target (ignoring processor)", "", result) });
+                    _this.setState({ results: replaceAll("'x86_64' is not a recognized processor for this target (ignoring processor)", "", result) });
                 });             
             });
+        });
+    },
+    componentDidMount: function() {
+        this.compile();
+    },
+    share: function() {
+        var json = JSON.stringify(this.state);
+        jQuery.ajax("http://coliru.stacked-crooked.com/share", {
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+                src: json,
+                cmd: "cat main.cpp"
+            })
+        }).then(result => {
+            this.props.history.push('/Sample/' + result);
         });
     }
 }));
@@ -320,21 +343,57 @@ var App = React.createClass({
 	render: function() {
 		return dom.div(null,
 		    NavBar(),
-			this.props.children,
-            Playground()
+			this.props.children
 		);
 	}
 });
 
+var Home = React.createClass({
+    render: function() {
+        return Playground({
+            helpText: "Welcome to codepuppy.co.uk",
+            history: this.props.history
+        });
+    }
+});
+
+var Sample = React.createClass({
+    getInitialState: function() {
+        return {};
+    },
+    componentDidMount: function() {
+        var id = this.props.params.sampleId;
+        var serverPath = getServerFilePath(id);
+        jQuery.ajax("http://coliru.stacked-crooked.com/compile", {
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+                src: "",
+                cmd: "cat " + serverPath
+            })
+        }).then(result => {
+            this.setState({ files: JSON.parse(result).files });
+        });
+    },
+    render: function() {
+        if (this.state.files)
+            return new Playground({
+                history: this.props.history,
+                files: this.state.files
+            });
+        return dom.div();        
+    }
+});
+
 const routes = {
-  path: '/',
   component: App,
   childRoutes: [
+    { path: 'Sample/:sampleId', component: Sample },
     { path: 'Blog', component: Blog },
+    { path: '/', component: Home }
   ]
 };
 
 document.addEventListener('DOMContentLoaded', function() {
-	document.getElementsByTagName("body")[0].style.margin = "0";
     ReactDOM.render(Router({ routes: routes }), document.getElementById("App"));	
 }, false);
