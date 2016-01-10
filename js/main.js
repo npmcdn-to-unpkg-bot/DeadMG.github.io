@@ -198,7 +198,8 @@ var Playground = React.createFactory(React.createClass({
                 { name: "main.cpp", source: "#include <iostream>", type: "cpp" },
             ],
             currentFile: this.props.files ? this.props.files[0].name : "HelloWorld.wide",
-            requesting: false
+            requesting: false,
+            caret: 0
         };
     },
     render: function() {
@@ -270,7 +271,8 @@ var Playground = React.createFactory(React.createClass({
             dom.div({ 
                 onClick: () => this.setState({ 
                     files: this.state.files.slice(0),
-                    currentFile: fileName
+                    currentFile: fileName,
+                    caret: null
                 }),
                 style: {
                     paddingLeft: "calc(" + largePadding + " - " + smallPadding + ")",
@@ -348,7 +350,11 @@ var Playground = React.createFactory(React.createClass({
                 };
                 _.find(newState.files, file => file.name == this.state.currentFile).source = event.target.value;
                 this.setState(newState);
-            }
+            },
+            onSelect: event => {
+                this.setState({ caret: event.target.selectionStart });
+            },
+            onBlur: () => this.setState({ caret: null })
         }),
         dom.div({ style: {
             position: "absolute",
@@ -368,27 +374,46 @@ var Playground = React.createFactory(React.createClass({
             dom.div({ style: { display: "flex", flexDirection: "column" } }, 
                 _.map(lines, (line, index) => 
                     dom.span({ key: index, className: "coliruFont", style: { width: largePadding, display: "inline-block", backgroundColor: "#DDDDDD" }}, index + 1))),
-            dom.pre({ style: { display: "inline", margin: 0 }, className: "coliruFont" }, this.highlightTokens(text, tokens))
+            dom.pre({ style: { display: "inline", margin: 0 }, className: "coliruFont" }, 
+                this.highlightTokens(text, tokens))
         );
     },
     highlightTokens: function(text, tokens) {
         var prevOffset = 0;
-        var lastChild = text.substring(_.last(tokens).GetLocation().end.offset, text.length);
+        var lastChild = this.renderCaretInText(text, _.last(tokens).GetLocation().end.offset, text.length);
         return _.flatten(_.map(tokens, token => {
             var previousOffset = prevOffset;
             prevOffset = token.GetLocation().end.offset;
             return [
-                text.substring(previousOffset, token.GetLocation().begin.offset),
+                this.renderCaretInText(text, previousOffset, token.GetLocation().begin.offset),
                 this.renderToken(text, token)
             ];
         })).concat(lastChild);
     },
     renderToken: function(text, token) {
+        var tokenText = this.renderCaretInText(text, token.GetLocation().begin.offset, token.GetLocation().end.offset);
         if (token.IsLiteral())
-            return dom.span({ style: { color: "red" }}, text.substring(token.GetLocation().begin.offset, token.GetLocation().end.offset));
+            return dom.span({ style: { color: "red" }}, tokenText);
         if (token.IsKeyword())
-            return dom.span({ style: { color: "blue" }}, text.substring(token.GetLocation().begin.offset, token.GetLocation().end.offset));
-        return token.GetValue();
+            return dom.span({ style: { color: "blue" }}, tokenText);
+        return tokenText;
+    },
+    renderCaretInText: function(text, begin, end) {
+        if (this.state.caret == null)
+            return text.substring(begin, end);
+        if (this.state.caret >= end || this.state.caret < begin)
+            return text.substring(begin, end);
+        // The caret is in here.
+        return dom.span(null,
+            text.substring(begin, this.state.caret),
+            dom.span({ style: { position: "relative" } }, 
+                dom.span({ style: { position: "absolute", top: "0px", left: "-3px" } }, 
+                    this.renderCaret())),
+            text.substring(this.state.caret, end)
+        );
+    },
+    renderCaret: function() {
+        return dom.span({ style: { color: "black" }, className: "blink_me" }, "|");
     },
     sendFiles: function(filter) {
         return _.map(_.filter(this.state.files, filter), file => jQuery.ajax("http://coliru.stacked-crooked.com/share", {
