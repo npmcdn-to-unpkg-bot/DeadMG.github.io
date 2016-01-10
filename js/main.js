@@ -362,16 +362,33 @@ var Playground = React.createFactory(React.createClass({
         }}, currentFile ? this.renderHighlightedText(currentFile.source) : ""));
     },
     renderHighlightedText: function(text) {
+        var tokens = Module.Lex(text);        
         var lines = text.split('\n');
-        return _.map(lines, (line, index) => 
-            dom.div(null,
-                dom.span({ key: index, className: "coliruFont", style: { width: largePadding, display: "inline-block", backgroundColor: "#DDDDDD" }}, index + 1),
-                dom.pre({ style: { display: "inline" }, className: "coliruFont" }, this.highlightLine(line))));
+        return dom.div({ style: { display: "flex" } },
+            dom.div({ style: { display: "flex", flexDirection: "column" } }, 
+                _.map(lines, (line, index) => 
+                    dom.span({ key: index, className: "coliruFont", style: { width: largePadding, display: "inline-block", backgroundColor: "#DDDDDD" }}, index + 1))),
+            dom.pre({ style: { display: "inline", margin: 0 }, className: "coliruFont" }, this.highlightTokens(text, tokens))
+        );
     },
-    highlightLine: function(line) {
-        if (line[0] == '/' && line[1] == '/')
-            return dom.span({ style: { color: "green" }}, line);
-        return line;
+    highlightTokens: function(text, tokens) {
+        var prevOffset = 0;
+        var lastChild = text.substring(_.last(tokens).GetLocation().end.offset, text.length);
+        return _.flatten(_.map(tokens, token => {
+            var previousOffset = prevOffset;
+            prevOffset = token.GetLocation().end.offset;
+            return [
+                text.substring(previousOffset, token.GetLocation().begin.offset),
+                this.renderToken(text, token)
+            ];
+        })).concat(lastChild);
+    },
+    renderToken: function(text, token) {
+        if (token.IsLiteral())
+            return dom.span({ style: { color: "red" }}, text.substring(token.GetLocation().begin.offset, token.GetLocation().end.offset));
+        if (token.IsKeyword())
+            return dom.span({ style: { color: "blue" }}, text.substring(token.GetLocation().begin.offset, token.GetLocation().end.offset));
+        return token.GetValue();
     },
     sendFiles: function(filter) {
         return _.map(_.filter(this.state.files, filter), file => jQuery.ajax("http://coliru.stacked-crooked.com/share", {
