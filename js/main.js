@@ -329,7 +329,6 @@ var Playground = React.createFactory(React.createClass({
                 width:"50vw",
                 display: "flex",
                 position: "relative",
-                fontFamily: "monospace",
                 fontSize: "12px"
             }
         }, dom.textarea({
@@ -366,8 +365,8 @@ var Playground = React.createFactory(React.createClass({
         var lines = text.split('\n');
         return _.map(lines, (line, index) => 
             dom.div(null,
-                dom.span({ key: index, style: { width: largePadding, display: "inline-block", backgroundColor: "#DDDDDD" }}, index + 1),
-                dom.pre({ style: { display: "inline" } }, this.highlightLine(line))));
+                dom.span({ key: index, className: "coliruFont", style: { width: largePadding, display: "inline-block", backgroundColor: "#DDDDDD" }}, index + 1),
+                dom.pre({ style: { display: "inline" }, className: "coliruFont" }, this.highlightLine(line))));
     },
     highlightLine: function(line) {
         if (line[0] == '/' && line[1] == '/')
