@@ -110,7 +110,8 @@ var DropdownMenu = React.createFactory(React.createClass({
             color: "black",
             marginTop: "-1px"
         }
-        return dom.div({ style: listStyle }, React.Children.map(this.props.children, (child, index) => new DropdownItem({ key: index }, child)));        
+        return dom.div({ style: listStyle }, 
+            React.Children.map(this.props.children, (child, index) => new DropdownItem({ key: index }, child)));        
     }
 }));
 
@@ -176,7 +177,7 @@ var NavBar = React.createFactory(React.createClass({
 		    //NavItem(null, "Trello"),
 			//NavItem(null, Link({ to: "/Blog" }, "Blog")),
 			//NavItem(null, "Chat"),
-			NavItem(null, dom.a({ href: "https://github.com/DeadMG/Wide" }, "Source")),
+			NavItem(null, dom.a({ href: "https://github.com/DeadMG/Wide" }, "GitHub")),
 			//NavItem(null, "Donate"),
 			NavItem(null, Link({ to: "/" }, "Home"))
 	    );
@@ -326,13 +327,19 @@ var Playground = React.createFactory(React.createClass({
         return dom.div({
             style: {
                 width:"50vw",
-                display: "flex"
+                display: "flex",
+                position: "relative",
+                fontFamily: "monospace",
+                fontSize: "12px"
             }
         }, dom.textarea({
             style: {
                 width: "100%",
                 margin: "0px",
-                paddingLeft: largePadding                
+                paddingLeft: largePadding,
+                opacity: 0,
+                zIndex: 1,
+                fontSize: "12px"
             },
             value: currentFile ? currentFile.source : "",
             onChange: event => {
@@ -343,7 +350,29 @@ var Playground = React.createFactory(React.createClass({
                 _.find(newState.files, file => file.name == this.state.currentFile).source = event.target.value;
                 this.setState(newState);
             }
-        }));
+        }),
+        dom.div({ style: {
+            position: "absolute",
+            top: "0px",
+            left: "0px",
+            border: "1px solid black",
+            width: "100%",
+            height: "100%",
+            boxSizing: "padding-box",
+            zIndex: 0
+        }}, currentFile ? this.renderHighlightedText(currentFile.source) : ""));
+    },
+    renderHighlightedText: function(text) {
+        var lines = text.split('\n');
+        return _.map(lines, (line, index) => 
+            dom.div(null,
+                dom.span({ key: index, style: { width: largePadding, display: "inline-block", backgroundColor: "#DDDDDD" }}, index + 1),
+                dom.pre({ style: { display: "inline" } }, this.highlightLine(line))));
+    },
+    highlightLine: function(line) {
+        if (line[0] == '/' && line[1] == '/')
+            return dom.span({ style: { color: "green" }}, line);
+        return line;
     },
     sendFiles: function(filter) {
         return _.map(_.filter(this.state.files, filter), file => jQuery.ajax("http://coliru.stacked-crooked.com/share", {
@@ -452,7 +481,7 @@ var Sample = React.createClass({
                 history: this.props.history,
                 files: this.state.files
             });
-        return dom.div();        
+        return new LoadingSpinner();        
     }
 });
 
@@ -476,3 +505,6 @@ const routes = {
 document.addEventListener('DOMContentLoaded', function() {
     ReactDOM.render(Router({ routes: routes }), document.getElementById("App"));	
 }, false);
+
+
+    // python -c "import subprocess, json; compiler_output, _ = subprocess.Popen('/usr/local/bin/Wide/Wide main.cpp', stdout = subprocess.PIPE, stderr = subprocess.STDOUT, shell = True).communicate(); program_output, _ = subprocess.Popen('g++ a.o && ./a.out', stdout = subprocess.PIPE, stderr = subprocess.STDOUT, shell = True).communicate(); print(json.dumps({ 'compiler': compiler_output, 'program': program_output }))"
