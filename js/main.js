@@ -334,6 +334,7 @@ var Playground = React.createFactory(React.createClass({
                 fontSize: "12px"
             }
         }, dom.textarea({
+            className: "coliruFont",
             style: {
                 width: "100%",
                 margin: "0px",
@@ -547,5 +548,4 @@ document.addEventListener('DOMContentLoaded', function() {
     ReactDOM.render(Router({ routes: routes }), document.getElementById("App"));	
 }, false);
 
-
-    // python -c "import subprocess, json; compiler_output, _ = subprocess.Popen('/usr/local/bin/Wide/Wide main.cpp', stdout = subprocess.PIPE, stderr = subprocess.STDOUT, shell = True).communicate(); program_output, _ = subprocess.Popen('g++ a.o && ./a.out', stdout = subprocess.PIPE, stderr = subprocess.STDOUT, shell = True).communicate(); print(json.dumps({ 'compiler': compiler_output, 'program': program_output }))"
+// python -c "import subprocess, json; compiler_output, _ = subprocess.Popen('/usr/local/bin/Wide/Wide main.cpp', stdout = subprocess.PIPE, stderr = subprocess.STDOUT, shell = True).communicate(); program_output, _ = subprocess.Popen('g++ a.o && ./a.out', stdout = subprocess.PIPE, stderr = subprocess.STDOUT, shell = True).communicate(); print(json.dumps({ 'compiler': compiler_output, 'program': program_output }))"
