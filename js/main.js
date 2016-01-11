@@ -198,8 +198,7 @@ var Playground = React.createFactory(React.createClass({
                 { name: "main.cpp", source: "#include <iostream>", type: "cpp" },
             ],
             currentFile: this.props.files ? this.props.files[0].name : "HelloWorld.wide",
-            requesting: false,
-            caret: 0
+            requesting: false
         };
     },
     render: function() {
@@ -271,8 +270,7 @@ var Playground = React.createFactory(React.createClass({
             dom.div({ 
                 onClick: () => this.setState({ 
                     files: this.state.files.slice(0),
-                    currentFile: fileName,
-                    caret: null
+                    currentFile: fileName
                 }),
                 style: {
                     paddingLeft: "calc(" + largePadding + " - " + smallPadding + ")",
@@ -337,11 +335,12 @@ var Playground = React.createFactory(React.createClass({
             className: "coliruFont",
             style: {
                 width: "100%",
-                margin: "0px",
+                margin: "1px",
                 paddingLeft: largePadding,
-                opacity: 0,
-                zIndex: 1,
-                fontSize: "12px"
+                zIndex: 0,
+                fontSize: "12px",
+                backgroundColor: "transparent",
+                border: "0px none"
             },
             value: currentFile ? currentFile.source : "",
             onChange: event => {
@@ -351,11 +350,7 @@ var Playground = React.createFactory(React.createClass({
                 };
                 _.find(newState.files, file => file.name == this.state.currentFile).source = event.target.value;
                 this.setState(newState);
-            },
-            onSelect: event => {
-                this.setState({ caret: event.target.selectionStart });
-            },
-            onBlur: () => this.setState({ caret: null })
+            }
         }),
         dom.div({ style: {
             position: "absolute",
@@ -365,7 +360,9 @@ var Playground = React.createFactory(React.createClass({
             width: "100%",
             height: "100%",
             boxSizing: "padding-box",
-            zIndex: 0
+            zIndex: 1,
+            backgroundColor: "transparent",
+            pointerEvents: "none"
         }}, currentFile ? this.renderHighlightedText(currentFile.source) : ""));
     },
     renderHighlightedText: function(text) {
@@ -400,21 +397,7 @@ var Playground = React.createFactory(React.createClass({
         return tokenText;
     },
     renderCaretInText: function(text, begin, end) {
-        if (this.state.caret == null)
-            return text.substring(begin, end);
-        if (this.state.caret >= end || this.state.caret < begin)
-            return text.substring(begin, end);
-        // The caret is in here.
-        return dom.span(null,
-            text.substring(begin, this.state.caret),
-            dom.span({ style: { position: "relative" } }, 
-                dom.span({ style: { position: "absolute", top: "0px", left: "-3px" } }, 
-                    this.renderCaret())),
-            text.substring(this.state.caret, end)
-        );
-    },
-    renderCaret: function() {
-        return dom.span({ style: { color: "black" }, className: "blink_me" }, "|");
+        return text.substring(begin, end);
     },
     sendFiles: function(filter) {
         return _.map(_.filter(this.state.files, filter), file => jQuery.ajax("http://coliru.stacked-crooked.com/share", {
