@@ -394,6 +394,8 @@ var Playground = React.createFactory(React.createClass({
             return dom.span({ style: { color: "red" }}, tokenText);
         if (token.IsKeyword())
             return dom.span({ style: { color: "blue" }}, tokenText);
+        if (token.IsComment())
+            return dom.span({ style: { color: "green" }}, tokenText);
         return tokenText;
     },
     renderCaretInText: function(text, begin, end) {
