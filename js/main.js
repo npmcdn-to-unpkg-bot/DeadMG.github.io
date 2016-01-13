@@ -324,6 +324,8 @@ var Playground = React.createFactory(React.createClass({
     },
     renderCodeView: function() {
         var currentFile = _.find(this.state.files, file => file.name == this.state.currentFile);
+        var isChrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
+        var browserSpecificMargins = isChrome ? { marginLeft: "1px", marginTop: "-1px" } : { margin: "1px" };
         return dom.div({
             style: {
                 width:"50vw",
@@ -333,15 +335,14 @@ var Playground = React.createFactory(React.createClass({
             }
         }, dom.textarea({
             className: "coliruFont",
-            style: {
+            style: _.extend({}, browserSpecificMargins, {
                 width: "100%",
-                margin: "1px",
                 paddingLeft: largePadding,
                 zIndex: 0,
                 fontSize: "12px",
                 backgroundColor: "transparent",
                 border: "0px none"
-            },
+            }),
             value: currentFile ? currentFile.source : "",
             onChange: event => {
                 var newState = {
