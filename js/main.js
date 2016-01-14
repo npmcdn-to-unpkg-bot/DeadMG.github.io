@@ -188,7 +188,34 @@ var LoadingSpinner = React.createFactory(React.createClass({
     render: function() {
         return dom.div({ className: "spinner-loader" });
     }
-}))
+}));
+
+var LexerError = React.createFactory(React.createClass({
+    getInitialState: function() {
+        return { hovered: false };
+    },
+    render: function() {
+        if (!this.state.hovered) {
+            return dom.span(
+                { 
+                    style: { pointerEvents: "all", textDecoration: "underline wavy red" },
+                    onMouseOver: () => this.setState({ hovered: true })
+                }, 
+                this.props.sourceText);            
+        }
+        return dom.span({ style: { position: "relative", pointerEvents: "all", textDecoration: "underline wavy red"  }, onMouseLeave: () => this.setState({ hovered: false }) }, 
+            this.props.sourceText,
+            dom.span({ style: { position: "absolute", zIndex: 2, left: "3px", top: "calc(100% + 3px)", boxShadow: "1px 1px black" } },
+                this.renderErrorPopup(this.props.errorText)));
+    },
+    renderErrorPopup: function(text) {
+        return dom.span({
+            style: {
+                backgroundColor: "#CCCCCC"
+            }
+        }, text);
+    },
+}));
 
 var Playground = React.createFactory(React.createClass({
     getInitialState: function() {
@@ -343,6 +370,10 @@ var Playground = React.createFactory(React.createClass({
                 backgroundColor: "transparent",
                 border: "0px none"
             }),
+            autoComplete: false,
+            autoCorrect: false,
+            autoCapitalize: false,
+            spellCheck: false,
             value: currentFile ? currentFile.source : "",
             onChange: event => {
                 var newState = {
@@ -367,37 +398,43 @@ var Playground = React.createFactory(React.createClass({
         }}, currentFile ? this.renderHighlightedText(currentFile.source) : ""));
     },
     renderHighlightedText: function(text) {
-        var tokens = Module.Lex(text);        
+        var results = Module.Lex(text);        
         var lines = text.split('\n');
         return dom.div({ style: { display: "flex" } },
             dom.div({ style: { display: "flex", flexDirection: "column" } }, 
                 _.map(lines, (line, index) => 
                     dom.span({ key: index, className: "coliruFont", style: { width: largePadding, display: "inline-block", backgroundColor: "#DDDDDD" }}, index + 1))),
             dom.pre({ style: { display: "inline", margin: 0 }, className: "coliruFont" }, 
-                this.highlightTokens(text, tokens))
+                this.highlightResult(text, results))
         );
     },
-    highlightTokens: function(text, tokens) {
+    highlightResult: function(text, results) {
         var prevOffset = 0;
-        var lastChild = this.renderCaretInText(text, _.last(tokens).GetLocation().end.offset, text.length);
-        return _.flatten(_.map(tokens, token => {
+        var lastChild = this.renderCaretInText(text, _.last(results).where.end.offset, text.length);
+        return _.flatten(_.map(results, token => {
             var previousOffset = prevOffset;
-            prevOffset = token.GetLocation().end.offset;
+            prevOffset = token.where.end.offset;
             return [
-                this.renderCaretInText(text, previousOffset, token.GetLocation().begin.offset),
-                this.renderToken(text, token)
+                this.renderCaretInText(text, previousOffset, token.where.begin.offset),
+                this.renderResult(text, token)
             ];
         })).concat(lastChild);
     },
-    renderToken: function(text, token) {
-        var tokenText = this.renderCaretInText(text, token.GetLocation().begin.offset, token.GetLocation().end.offset);
-        if (token.IsLiteral())
+    renderResult: function(text, result) {
+        var tokenText = this.renderCaretInText(text, result.where.begin.offset, result.where.end.offset);
+        if (result.what) {
+            return this.renderError(tokenText, result);
+        }
+        if (result.IsLiteral())
             return dom.span({ style: { color: "red" }}, tokenText);
-        if (token.IsKeyword())
+        if (result.IsKeyword())
             return dom.span({ style: { color: "blue" }}, tokenText);
-        if (token.IsComment())
+        if (result.IsComment())
             return dom.span({ style: { color: "green" }}, tokenText);
         return tokenText;
+    },
+    renderError: function(text, error) {
+        return new LexerError({ sourceText: text, errorText: error.what });
     },
     renderCaretInText: function(text, begin, end) {
         return text.substring(begin, end);
