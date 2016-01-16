@@ -284,7 +284,8 @@ var Playground = React.createFactory(React.createClass({
         return dom.div({ style: { display: "flex" }},
             dom.div({
                 style: {
-                    padding: smallPadding
+                    padding: smallPadding,
+                    cursor: "pointer"
                 },
                 onClick: () => {
                     var newFiles = _.filter(this.state.files, file => file.name !== fileName);
@@ -319,7 +320,7 @@ var Playground = React.createFactory(React.createClass({
             display: "flex"
         };
         if (!this.state.newFile) {
-            return dom.div({ style: containerStyle, onClick: () => this.setState({ newFile: true }) }, "+");
+            return dom.div({ style: _.extend(containerStyle, { cursor: "pointer" }), onClick: () => this.setState({ newFile: true }) }, "+");
         }
         return dom.div({ style: containerStyle },
             dom.div({
