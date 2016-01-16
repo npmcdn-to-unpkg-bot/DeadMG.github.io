@@ -7,6 +7,10 @@ function escapeRegExp(string) {
 function getServerFilePath(id) {
     return "/Archive2/" + id.substr(0, 2) + "/" + id.substr(2, id.length).trim() + "/main.cpp";
 }
+function getServerShareFilePath(id) {
+    return "/Archive/" + id.substr(0, 2) + "/" + id.substr(2, id.length).trim() + "/main.cpp";
+}
+
 
 var largePadding = "16px";
 var smallPadding = "5px";
@@ -410,6 +414,8 @@ var Playground = React.createFactory(React.createClass({
         );
     },
     highlightResult: function(text, results) {
+        if (results.length == 0)
+            return text;
         var prevOffset = 0;
         var lastChild = this.renderCaretInText(text, _.last(results).where.end.offset, text.length);
         return _.flatten(_.map(results, token => {
@@ -529,14 +535,8 @@ var Sample = React.createClass({
     },
     componentDidMount: function() {
         var id = this.props.params.sampleId;
-        var serverPath = getServerFilePath(id);
-        jQuery.ajax("http://coliru.stacked-crooked.com/compile", {
-            method: "POST",
-            contentType: "application/json",
-            data: JSON.stringify({
-                src: "",
-                cmd: "cat " + serverPath
-            })
+        jQuery.ajax("http://coliru.stacked-crooked.com" + getServerShareFilePath(id), {
+            method: "GET"
         }).then(result => {
             this.setState({ files: JSON.parse(result).files });
         });
