@@ -194,7 +194,7 @@ var LoadingSpinner = React.createFactory(React.createClass({
     }
 }));
 
-var LexerError = React.createFactory(React.createClass({
+var Error = React.createFactory(React.createClass({
     getInitialState: function() {
         return { hovered: false };
     },
@@ -205,19 +205,12 @@ var LexerError = React.createFactory(React.createClass({
                     style: { pointerEvents: "all", textDecoration: "underline wavy red" },
                     onMouseOver: () => this.setState({ hovered: true })
                 }, 
-                this.props.sourceText);            
+                this.props.children);            
         }
         return dom.span({ style: { position: "relative", pointerEvents: "all", textDecoration: "underline wavy red"  }, onMouseLeave: () => this.setState({ hovered: false }) }, 
-            this.props.sourceText,
+            this.props.children,
             dom.span({ style: { position: "absolute", zIndex: 2, left: "3px", top: "calc(100% + 3px)", boxShadow: "1px 1px black" } },
-                this.renderErrorPopup(this.props.errorText)));
-    },
-    renderErrorPopup: function(text) {
-        return dom.span({
-            style: {
-                backgroundColor: "#CCCCCC"
-            }
-        }, text);
+                dom.span({ style: { backgroundColor: "#CCCCCC" } }, this.props.errorText)));
     },
 }));
 
@@ -403,7 +396,7 @@ var Playground = React.createFactory(React.createClass({
         }}, currentFile ? this.renderHighlightedText(currentFile.source) : ""));
     },
     renderHighlightedText: function(text) {
-        var results = Module.Lex(text);        
+        var results = Module.Parse(text);        
         var lines = text.split('\n');
         return dom.div({ style: { display: "flex" } },
             dom.div({ style: { display: "flex", flexDirection: "column" } }, 
@@ -414,23 +407,52 @@ var Playground = React.createFactory(React.createClass({
         );
     },
     highlightResult: function(text, results) {
-        if (results.length == 0)
+        if (results.lexerResult.length == 0)
             return text;
-        var prevOffset = 0;
-        var lastChild = this.renderCaretInText(text, _.last(results).where.end.offset, text.length);
-        return _.flatten(_.map(results, token => {
-            var previousOffset = prevOffset;
-            prevOffset = token.where.end.offset;
+        var lastChild = this.renderCaretInText(text, _.last(results.lexerResult).where.end.offset, text.length);
+        var prevOffset = { offset: 0 };
+        if (results.parserResult && results.parserResult.length != 0) {
+            var prevErrorOffset = 0;
+            var afterAll = _.filter(results.lexerResult, token => token.where.begin.offset > _.last(results.parserResult).where.end.offset);
+            
+            var errors = _.map(results.parserResult, error => {
+                // The parser result should cover a valid range of tokens.            
+                var before = _.filter(results.lexerResult, token => token.where.begin.offset < error.where.begin.offset && token.where.begin.offset >= prevErrorOffset);
+                var middle = _.filter(results.lexerResult, token => token.where.begin.offset >= error.where.begin.offset && token.where.end.offset <= error.where.end.offset);
+                
+                var beforeResults = this.renderLexerResults(before, text, null, prevOffset);
+                var middleResults = this.renderLexerResults(middle, text, null, prevOffset);
+                if (middleResults.length != 0) {
+                    if (_.isString(middleResults[0])) {
+                        beforeResults.push(middleResults[0]);
+                        middleResults = middleResults.slice(1);
+                    }
+                }
+                prevErrorOffset = _.last(middle).where.end.offset;
+                return [
+                    beforeResults,
+                    new Error({ errorText: error.what }, middleResults)
+                ];                
+            });
+            var afterResults = this.renderLexerResults(afterAll, text, lastChild, prevOffset);
+            return errors.concat(afterResults);
+        }
+        return this.renderLexerResults(results.lexerResult, text, lastChild, prevOffset);
+    },
+    renderLexerResults: function(lexerResults, text, lastChild, prevOffset) {
+        return _.flatten(_.map(lexerResults, token => {
+            var previousOffset = prevOffset.offset;
+            prevOffset.offset = token.where.end.offset;
             return [
                 this.renderCaretInText(text, previousOffset, token.where.begin.offset),
                 this.renderResult(text, token)
             ];
-        })).concat(lastChild);
+        })).concat(lastChild);        
     },
     renderResult: function(text, result) {
         var tokenText = this.renderCaretInText(text, result.where.begin.offset, result.where.end.offset);
         if (result.what) {
-            return this.renderError(tokenText, result);
+            return new Error({ errorText: result.what }, tokenText);
         }
         if (result.IsLiteral())
             return dom.span({ style: { color: "red" }}, tokenText);
@@ -438,13 +460,13 @@ var Playground = React.createFactory(React.createClass({
             return dom.span({ style: { color: "blue" }}, tokenText);
         if (result.IsComment())
             return dom.span({ style: { color: "green" }}, tokenText);
-        return tokenText;
-    },
-    renderError: function(text, error) {
-        return new LexerError({ sourceText: text, errorText: error.what });
+        return dom.span(null, tokenText);
     },
     renderCaretInText: function(text, begin, end) {
-        return text.substring(begin, end);
+        var subText = text.substring(begin, end);
+        if (subText == "")
+            return null;
+        return subText;
     },
     sendFiles: function(filter) {
         return _.map(_.filter(this.state.files, filter), file => jQuery.ajax("http://coliru.stacked-crooked.com/share", {
