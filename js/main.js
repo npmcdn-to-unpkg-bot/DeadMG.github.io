@@ -216,13 +216,17 @@ var Error = React.createFactory(React.createClass({
 
 var Playground = React.createFactory(React.createClass({
     getInitialState: function() {
+        var files = this.props.files || [
+            { name: "HelloWorld.wide", source: "Main() {\n    std.cout << \"Hello, World!\";\n}", type: "wide" },
+            { name: "main.cpp", source: "#include <iostream>", type: "cpp" },
+        ];
+        var currentFile = this.props.files ? this.props.files[0].name : "HelloWorld.wide";
         return {
-            files: this.props.files || [
-                { name: "HelloWorld.wide", source: "Main() {\n    std.cout << \"Hello, World!\";\n}", type: "wide" },
-                { name: "main.cpp", source: "#include <iostream>", type: "cpp" },
-            ],
-            currentFile: this.props.files ? this.props.files[0].name : "HelloWorld.wide",
-            requesting: false
+            files: files,
+            currentFile: currentFile,
+            requesting: false,
+            parseResults: Module.Parse(_.find(files, file => file.name == currentFile).source),
+            outlines: []
         };
     },
     render: function() {
@@ -372,11 +376,13 @@ var Playground = React.createFactory(React.createClass({
             autoCorrect: false,
             autoCapitalize: false,
             spellCheck: false,
-            value: currentFile ? currentFile.source : "",
-            onChange: event => {
+            value: this.renderOutlinedText(currentFile ? currentFile.source : ""),
+            onInput: event => {
                 var newState = {
                     files: this.state.files.slice(0),
-                    currentFile: this.state.currentFile
+                    currentFile: this.state.currentFile,
+                    parseResults: Module.Parse(event.target.value),
+                    outlines: []
                 };
                 _.find(newState.files, file => file.name == this.state.currentFile).source = event.target.value;
                 this.setState(newState);
@@ -395,16 +401,79 @@ var Playground = React.createFactory(React.createClass({
             pointerEvents: "none"
         }}, currentFile ? this.renderHighlightedText(currentFile.source) : ""));
     },
+    renderOutlinedText: function(text) {
+        if (this.state.outlines.length == 0)
+            return text;
+        var latestOffset = 0;
+        var lines = _.flatten(_.map(this.state.outlines, outline => {
+            var currLatestOffset = latestOffset;
+            latestOffset = outline.end.offset;
+            return [
+                text.substring(currLatestOffset, outline.begin.offset),
+                "..."
+            ];
+        }));
+        return lines.concat([text.substring(_.last(this.state.outlines).end.offset)]).join('');
+    },
     renderHighlightedText: function(text) {
-        var results = Module.Parse(text);        
-        var lines = text.split('\n');
+        var results = this.state.parseResults;    
+        var lines = this.renderOutlinedText(text).split('\n');
         return dom.div({ style: { display: "flex" } },
-            dom.div({ style: { display: "flex", flexDirection: "column" } }, 
+            dom.div({ style: { display: "flex", flexDirection: "column", pointerEvents: "all" } }, 
                 _.map(lines, (line, index) => 
-                    dom.span({ key: index, className: "coliruFont", style: { width: largePadding, display: "inline-block", backgroundColor: "#DDDDDD" }}, index + 1))),
+                    dom.span({ key: index, className: "coliruFont", style: { width: largePadding, display: "inline-block", backgroundColor: "#DDDDDD" } }, 
+                        this.renderLineNumber(index + 1, text)))),
             dom.pre({ style: { display: "inline", margin: 0 }, className: "coliruFont" }, 
                 this.highlightResult(text, results))
         );
+    },
+    getPreOutliningLineNumbers: function(postOutliningLineNumber, originalText) {
+        if (postOutliningLineNumber == 1 || this.state.outlines.length == 0)
+            return [postOutliningLineNumber];
+        var result = [];
+        var lineNum = 1;
+        var postLineNum = 1;
+        _.each(originalText, (character, offset) => {
+            if (character == '\n') {
+                ++lineNum;
+                // If offset is hidden by outlining, then the post-outlining line number won't change
+                if (!_.any(this.state.outlines, outline => outline.begin.offset <= offset && outline.end.offset > offset))
+                    ++postLineNum;
+                if (postLineNum == postOutliningLineNumber)
+                    result.push(lineNum);
+            }
+        });
+        return result;
+    },
+    renderLineNumber: function(num, originalText) {
+        if (!this.state.parseResults.outlines)
+            return num;
+        // Num is the post-outlining line number. Need to figure out the range of pre-outlining numbers.
+        var preOutlineNumbers = this.getPreOutliningLineNumbers(num, originalText);
+        if (_.any(this.state.parseResults.outlines, outline => _.find(preOutlineNumbers, lineNumber => outline.begin.line == lineNumber))) {
+            // If there are any collapsed outlines, show the expand icon to expand them.
+            var existingOutline = _.find(this.state.outlines, outline => _.any(preOutlineNumbers, num => num == outline.begin.line));
+            if (existingOutline)
+                return dom.span(null,
+                    num.toString(),
+                    dom.span({ onClick: () => this.setState({ outlines: _.without(this.state.outlines, existingOutline)})},
+                        "+"));
+            // Otherwise, just pick the first one and do that.
+            var newOutline = _.find(this.state.parseResults.outlines, outline => _.find(preOutlineNumbers, lineNumber => outline.begin.line == lineNumber));
+            return dom.span(null, 
+                num.toString(), 
+                dom.span(
+                    { 
+                        onClick: () => this.setState({ 
+                            outlines: this.state.outlines.concat([{
+                                begin: newOutline.begin,
+                                end: newOutline.end
+                            }]).sort((lhs, rhs) => lhs.begin.offset - rhs.begin.offset)
+                        }) 
+                    }, 
+                    "-"));
+        }
+        return num;
     },
     highlightResult: function(text, results) {
         if (results.lexerResult.length == 0)
@@ -439,17 +508,26 @@ var Playground = React.createFactory(React.createClass({
         }
         return this.renderLexerResults(results.lexerResult, text, lastChild, prevOffset);
     },
+    isTextHiddenDueToOutlining: function(result) {
+        return _.any(this.state.outlines, outline => result.where.begin.offset >= outline.begin.offset && result.where.end.offset <= outline.end.offset) && !_.any(this.state.outlines, outline => result.where.begin.offset == outline.begin.offset);
+    },
     renderLexerResults: function(lexerResults, text, lastChild, prevOffset) {
         return _.flatten(_.map(lexerResults, token => {
             var previousOffset = prevOffset.offset;
             prevOffset.offset = token.where.end.offset;
             return [
-                this.renderCaretInText(text, previousOffset, token.where.begin.offset),
+                this.isTextHiddenDueToOutlining(token) ? null : this.renderCaretInText(text, previousOffset, token.where.begin.offset),
                 this.renderResult(text, token)
             ];
         })).concat(lastChild);        
     },
     renderResult: function(text, result) {
+        if (_.any(this.state.outlines, outline => result.where.begin.offset >= outline.begin.offset && result.where.end.offset <= outline.end.offset)) {
+            if (_.any(this.state.outlines, outline => result.where.begin.offset == outline.begin.offset))
+                return dom.span({ style: { backgroundColor: "#DDDDDD" } }, "...");
+            else
+                return null;
+        }
         var tokenText = this.renderCaretInText(text, result.where.begin.offset, result.where.end.offset);
         if (result.what) {
             return new Error({ errorText: result.what }, tokenText);
@@ -457,7 +535,7 @@ var Playground = React.createFactory(React.createClass({
         if (result.IsLiteral())
             return dom.span({ style: { color: "red" }}, tokenText);
         if (result.IsKeyword())
-            return dom.span({ style: { color: "blue" }}, tokenText);
+            return dom.span({ style: { color: "rgb(85, 85, 255)" }}, tokenText);
         if (result.IsComment())
             return dom.span({ style: { color: "green" }}, tokenText);
         return dom.span(null, tokenText);
