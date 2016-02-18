@@ -480,34 +480,33 @@ var Playground = React.createFactory(React.createClass({
     },
     compile: function() {
         this.setState({ requesting: true });
-        var wideRequests = this.sendFiles(file => file.type == "wide");
-        var cppRequests = this.sendFiles(file => file.type == "cpp");
-        var _this = this;
-        jQuery.when(...wideRequests).done(function() {
-            var wideResults = _.filter(Array.prototype.slice.call(arguments), (value, index) => index % 3 == 0);
-            jQuery.when(...cppRequests).done(function() {
-                var cppResults = _.filter(Array.prototype.slice.call(arguments), (value, index) => index % 3 == 0);
-                var wideLocations = _.map(wideResults, http => getServerFilePath(http));
-                var cppLocations = _.map(cppResults, http => getServerFilePath(http));      
-                var identitySrc = "Identity(x) { return Identity; } Identity() { return Identity; }";
-                var usingSrc = "using cplusplus := ";
-                if (cppLocations.length == 0) {
-                    usingSrc = ""
-                } else {
-                    usingSrc += "Identity()" + _.reduce(cppLocations, (current, location) => current += "(cpp(\"" + location + "\"))","") + ";";
-                }
-                jQuery.ajax("http://coliru.stacked-crooked.com/compile", {
-                    method: "POST",
-                    contentType: "application/json",
-                    data: JSON.stringify({
-                        src: identitySrc + usingSrc,
-                        cmd: "/usr/local/bin/Wide/Wide main.cpp " + _.reduce(wideLocations, (location, current) => current += location, "") + " && g++ a.o && ./a.out"
-                    })
-                }).then(result => {
-                    _this.setState({ results: replaceAll("'x86_64' is not a recognized processor for this target (ignoring processor)", "", result), requesting: false });
-                });             
+        var src = {
+            Source: _.map(_.filter(this.state.files, file => file.type == "wide"), file => ({
+                Name: file.name,
+                Contents: file.source
+            })),
+            CppSource: _.map(_.filter(this.state.files, file => file.type == "cpp"), file => ({
+                Name: file.name,
+                Contents: file.source
+            })),
+            StdlibPath: "/usr/local/bin/Wide/WideLibrary"
+        };        
+        jQuery.ajax("http://coliru.stacked-crooked.com/compile", {
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+                src: JSON.stringify(src),
+                cmd: "python -c \"import subprocess, json; compiler_output, _ = subprocess.Popen('/usr/local/bin/Wide/Wide --interface=JSON main.cpp', stdout = subprocess.PIPE, stderr = subprocess.STDOUT, shell = True).communicate(); program_output, _ = subprocess.Popen('g++ a.o && ./a.out', stdout = subprocess.PIPE, stderr = subprocess.STDOUT, shell = True).communicate(); print(json.dumps({ 'compiler': compiler_output, 'program': program_output }))\""
+            })
+        }).then(result => {
+            var data = JSON.parse(replaceAll("'x86_64' is not a recognized processor for this target (ignoring processor)", "", result));
+            var compilerData = JSON.parse(data.compiler);
+            this.setState({                
+                results: data.program, 
+                compilerResults: compilerData,
+                requesting: false 
             });
-        });
+        }); 
     },
     componentDidMount: function() {
         this.props.files && this.compile();
@@ -594,4 +593,3 @@ document.addEventListener('DOMContentLoaded', function() {
     ReactDOM.render(Router({ routes: routes }), document.getElementById("App"));	
 }, false);
 
-// python -c "import subprocess, json; compiler_output, _ = subprocess.Popen('/usr/local/bin/Wide/Wide main.cpp', stdout = subprocess.PIPE, stderr = subprocess.STDOUT, shell = True).communicate(); program_output, _ = subprocess.Popen('g++ a.o && ./a.out', stdout = subprocess.PIPE, stderr = subprocess.STDOUT, shell = True).communicate(); print(json.dumps({ 'compiler': compiler_output, 'program': program_output }))"
