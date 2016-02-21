@@ -214,54 +214,20 @@ var Error = React.createFactory(React.createClass({
     },
 }));
 
-var Playground = React.createFactory(React.createClass({
+var Parse = (function() {
+    var cache = {};
+    return function(text) {
+        if (!cache[text])
+            cache[text] = Module.Parse(text);
+        return cache[text];
+    }
+})();
+
+var FileList = React.createFactory(React.createClass({
     getInitialState: function() {
-        return {
-            files: this.props.files || [
-                { name: "HelloWorld.wide", source: "Main() {\n    std.cout << \"Hello, World!\";\n}", type: "wide" },
-                { name: "main.cpp", source: "#include <iostream>", type: "cpp" },
-            ],
-            currentFile: this.props.files ? this.props.files[0].name : "HelloWorld.wide",
-            requesting: false
-        };
+        return {};
     },
-    render: function() {
-        return dom.div({
-                style: {
-                    marginTop: largePadding,
-                    marginBottom: largePadding,
-                    height: "calc(100vh - 110px)"                    
-                }
-            }, 
-            this.renderHeaderButtons(),
-            dom.div({
-                    style: {
-                        display: "flex",
-                        height: "calc(100% - 40px)"
-                    }
-                },
-                this.renderTreeView(),
-                this.renderCodeView(),
-                this.renderResults()
-            )
-        );
-    },
-    renderHeaderButtons: function() {
-        return dom.div({ style: { marginBottom: largePadding, marginTop: "0", display: "flex" } },
-            this.renderHeaderButton(dom.button({ onClick: () => this.compile() }, "Compile")),
-            this.renderHeaderButton(dom.button({ onClick: () => this.share() }, "Share")));
-    },
-    renderHeaderButton: function(button) {
-        return dom.div({ style: { marginLeft: largePadding } }, button);  
-    },
-    renderResults: function() {
-        if (!this.props.helpText)
-            return this.state.results;
-        return dom.div({ style: { paddingLeft: largePadding }},
-            dom.div(null, this.props.helpText),
-            dom.div(null, this.state.requesting ? LoadingSpinner() : this.state.results));
-    },
-    renderTreeView: function() {
+    render: function() {        
         return dom.div({
             style: {
                 display: "flex",
@@ -273,8 +239,8 @@ var Playground = React.createFactory(React.createClass({
         }, this.renderFileList(), this.renderNewFile());
     },
     renderFileList: function() {
-        return _.map(this.state.files, file => {
-            return dom.div({ key: file.name }, this.renderFileLink(file.name));
+        return _.map(this.props.files, file => {
+            return dom.div({ key: file }, this.renderFileLink(file));
         });
     },
     renderFileLink: function(fileName) { 
@@ -285,16 +251,16 @@ var Playground = React.createFactory(React.createClass({
                     cursor: "pointer"
                 },
                 onClick: () => {
-                    var newFiles = _.filter(this.state.files, file => file.name !== fileName);
-                    if (this.state.currentFile === fileName)
-                        this.setState({ currentFile: newFiles.length > 0 ? newFiles[0].name : null, files: newFiles });
+                    var newFiles = _.filter(this.props.files, file => file !== fileName);
+                    if (this.props.currentFile === fileName)
+                        this.props.onChange({ currentFile: newFiles.length > 0 ? newFiles[0].name : null, files: newFiles });
                     else
-                        this.setState({ files: newFiles })
+                        this.props.onChange({ files: newFiles, currentFile: this.props.currentFile })
                 }
             }, "-"), 
             dom.div({ 
-                onClick: () => this.setState({ 
-                    files: this.state.files.slice(0),
+                onClick: () => this.props.onChange({ 
+                    files: this.props.files.slice(0),
                     currentFile: fileName
                 }),
                 style: {
@@ -303,7 +269,7 @@ var Playground = React.createFactory(React.createClass({
                     color: "white",
                     paddingTop: smallPadding, 
                     paddingBottom: smallPadding, 
-                    background: this.state.currentFile == fileName ? "grey" : "black",
+                    background: this.props.currentFile == fileName ? "grey" : "black",
                     flexGrow: "1"
                 }
             }, fileName));        
@@ -339,13 +305,140 @@ var Playground = React.createFactory(React.createClass({
             this.setState({ newFile: false });
             return;
         }
-        var newFiles = this.state.files.slice(0);
-        newFiles.push({
-            name: name,
-            source: "",
-            type: name.endsWith('.wide') ? "wide" : "cpp"
-        });
-        this.setState({ newFile: false, currentFile: name, files: newFiles });
+        var newFiles = this.props.files.slice(0);
+        newFiles.push(name);
+        this.setState({ newFile: false });
+        this.props.onChange({ currentFile: name, files: newFiles });
+    },
+}));
+
+var Examples = "examples";
+var Help = "help";
+var Output = "output";
+var Errors = "errors";
+
+var Results = React.createFactory(React.createClass({
+    render: function() {
+        return dom.div({ style: { marginLeft: largePadding, flexGrow: "1", marginRight: largePadding, position: "relative" }},
+            dom.div({ style: { display: "flex", position: "absolute", bottom: "100%" } },
+                this.renderResultsTab("Help", Help),
+                this.renderResultsTab("Examples", Examples),
+                this.renderResultsTab("Output", Output),
+                this.renderResultsTab("Errors", Errors)),
+            dom.div({ style: { height: "100%", border: "1px solid black" } }, 
+                this.renderTabContents(this.props.location)));        
+    },
+    renderResultsTab: function(tabName, tabIdentifier) {
+        return dom.div({
+            style: {
+                paddingLeft: largePadding,
+                paddingRight: largePadding,
+                color: "white",
+                paddingTop: smallPadding, 
+                paddingBottom: smallPadding, 
+                background: this.props.location == tabIdentifier ? "grey" : "black"
+            },
+            onClick: () => this.props.onChange(tabIdentifier)
+        }, tabName);
+    },
+    renderTabContents: function(location) {
+        switch(location) {
+            case Examples:
+                return this.renderExamplesTab();
+            case Help:
+                return this.renderHelpTab();
+            case Output:
+                return this.renderOutputTab();
+            case Errors:
+                return this.renderErrorsTab();
+        }
+    },
+    renderExamplesTab: function() {
+        return null;
+    },
+    renderHelpTab: function() {
+        return this.props.helpText;
+    },
+    renderOutputTab: function() {
+        if (this.props.requesting)
+            return LoadingSpinner();
+        if (this.props.results)
+            return this.props.results;
+    },
+    renderErrorsTab: function() {
+        return _.map(_.filter(this.props.files, file => file.type == "wide"), file => {
+            var errs = Parse(file.source); 
+            var parserErrs = _.map(errs.parserResult, err => this.renderError(err, file.name));
+            var lexerErrs = _.map(_.filter(errs.lexerResult, err => err.what), err => this.renderError(err, file.name));
+            return parserErrs.concat(lexerErrs);
+        }).concat(_.map(this.props.compilerErrors, error => this.renderSemanticError(error)));
+    },
+    renderSemanticError: function(error) {
+        return dom.div(null, error.Where.Filename, ":", error.Where.Begin.Line, ":", error.Where.Begin.Column, "-", error.Where.End.Line, ":", error.Where.End.Column, dom.span({ style: { paddingLeft: "10px" } }, error.What));
+    },
+    renderError: function(error, filename) {
+        return dom.div(null, filename, ":", error.where.begin.line, ":", error.where.begin.column, "-", error.where.end.line, ":", error.where.end.column, dom.span({ style: { paddingLeft: "10px" } }, error.what));
+    }
+}));
+
+var Playground = React.createFactory(React.createClass({
+    getInitialState: function() {
+        return {
+            files: this.props.files || [
+                { name: "HelloWorld.wide", source: "Main() {\n    std.cout << \"Hello, World!\";\n}", type: "wide" },
+                { name: "main.cpp", source: "#include <iostream>", type: "cpp" },
+            ],
+            currentFile: this.props.files ? this.props.files[0].name : "HelloWorld.wide",
+            requesting: false
+        };
+    },
+    render: function() {
+        return dom.div({
+                style: {
+                    marginTop: largePadding,
+                    marginBottom: largePadding,
+                    height: "calc(100vh - 110px)"                    
+                }
+            }, 
+            this.renderHeaderButtons(),
+            dom.div({
+                    style: {
+                        display: "flex",
+                        height: "calc(100% - 40px)"
+                    }
+                },
+                FileList({
+                    currentFile: this.state.currentFile,
+                    files: _.map(this.state.files, file => file.name),
+                    onChange: newState => this.setState({
+                        currentFile: newState.currentFile,
+                        files: _.map(newState.files, file => ({
+                            name: file,
+                            source: (_.find(this.state.files, sFile => sFile.name == file) || { source: "" }).source,
+                            type: file.endsWith('.wide') ? "wide" : "cpp"
+                        }))
+                    })
+                }),
+                this.renderCodeView(),
+                Results({
+                    results: this.state.results,
+                    requesting: this.state.requesting,
+                    helpText: this.props.helpText,
+                    files: this.state.files,
+                    compilerErrors: this.state.compilerResults && this.state.compilerResults.Errors,
+                    location: this.state.resultsLocation ? this.state.resultsLocation : (this.props.helpText ? Help : Output),
+                    onChange: newLocation => this.setState({ resultsLocation: newLocation })
+                })
+            )
+        );
+    },
+    renderHeaderButtons: function() {
+        return dom.div({ style: { marginBottom: largePadding, marginTop: "0", display: "flex" } },
+            this.renderHeaderButton(dom.button({ onClick: () => this.compile() }, "Compile")),
+            this.renderHeaderButton(dom.button({ onClick: () => this.share() }, "Share")));
+    },
+    renderHeaderButton: function(button) {
+        return dom.div({ style: { marginLeft: largePadding } }, button);  
     },
     renderCodeView: function() {
         var currentFile = _.find(this.state.files, file => file.name == this.state.currentFile);
@@ -356,7 +449,8 @@ var Playground = React.createFactory(React.createClass({
                 width:"50vw",
                 display: "flex",
                 position: "relative",
-                fontSize: "12px"
+                fontSize: "12px",
+                flexShrink: 0
             }
         }, dom.textarea({
             className: "coliruFont",
@@ -376,7 +470,8 @@ var Playground = React.createFactory(React.createClass({
             onChange: event => {
                 var newState = {
                     files: this.state.files.slice(0),
-                    currentFile: this.state.currentFile
+                    currentFile: this.state.currentFile,
+                    showCompilerErrors: false
                 };
                 _.find(newState.files, file => file.name == this.state.currentFile).source = event.target.value;
                 this.setState(newState);
@@ -393,24 +488,54 @@ var Playground = React.createFactory(React.createClass({
             zIndex: 1,
             backgroundColor: "transparent",
             pointerEvents: "none"
-        }}, currentFile ? this.renderHighlightedText(currentFile.source) : ""));
+        }}, currentFile ? this.renderHighlightedText(currentFile.source, currentFile.type, currentFile.name) : ""));
     },
-    renderHighlightedText: function(text) {
-        var results = Module.Parse(text);        
+    renderHighlightedText: function(text, type, filename) {
+        var results = Parse(text);        
         var lines = text.split('\n');
         return dom.div({ style: { display: "flex" } },
             dom.div({ style: { display: "flex", flexDirection: "column" } }, 
                 _.map(lines, (line, index) => 
                     dom.span({ key: index, className: "coliruFont", style: { width: largePadding, display: "inline-block", backgroundColor: "#DDDDDD" }}, index + 1))),
             dom.pre({ style: { display: "inline", margin: 0 }, className: "coliruFont" }, 
-                this.highlightResult(text, results))
+                type == "wide" ? this.highlightResult(text, results, filename) : text)
         );
     },
-    highlightResult: function(text, results) {
+    highlightResult: function(text, results, filename) {
         if (results.lexerResult.length == 0)
             return text;
         var lastChild = this.renderCaretInText(text, _.last(results.lexerResult).where.end.offset, text.length);
         var prevOffset = { offset: 0 };
+        if (this.state.showCompilerErrors && this.state.compilerResults) {
+            var errors = _.filter(this.state.compilerResults.Errors, error => error.Where.Filename == filename);
+            if (errors.length != 0) {
+                var prevErrorOffset = 0;
+                var afterAll = _.filter(results.lexerResult, token => token.where.begin.offset > _.last(errors).Where.End.Offset);
+                
+                var errors = _.map(errors, error => {
+                    if (prevErrorOffset == error.Where.End.Offset) return [];
+                    // The parser result should cover a valid range of tokens.            
+                    var before = _.filter(results.lexerResult, token => token.where.begin.offset < error.Where.Begin.Offset && token.where.begin.offset >= prevErrorOffset);
+                    var middle = _.filter(results.lexerResult, token => token.where.begin.offset >= error.Where.Begin.Offset && token.where.end.offset <= error.Where.End.Offset);
+                    
+                    var beforeResults = this.renderLexerResults(before, text, null, prevOffset);
+                    var middleResults = this.renderLexerResults(middle, text, null, prevOffset);
+                    if (middleResults.length != 0) {
+                        if (_.isString(middleResults[0])) {
+                            beforeResults.push(middleResults[0]);
+                            middleResults = middleResults.slice(1);
+                        }
+                    }
+                    prevErrorOffset = _.last(middle).where.end.offset;
+                    return [
+                        beforeResults,
+                        new Error({ errorText: error.What }, middleResults)
+                    ];                
+                });
+                var afterResults = this.renderLexerResults(afterAll, text, lastChild, prevOffset);
+                return errors.concat(afterResults);                
+            }
+        }
         if (results.parserResult && results.parserResult.length != 0) {
             var prevErrorOffset = 0;
             var afterAll = _.filter(results.lexerResult, token => token.where.begin.offset > _.last(results.parserResult).where.end.offset);
@@ -478,7 +603,7 @@ var Playground = React.createFactory(React.createClass({
             })
         }));        
     },
-    compile: function() {
+    compile: function() {      
         this.setState({ requesting: true });
         var src = {
             Source: _.map(_.filter(this.state.files, file => file.type == "wide"), file => ({
@@ -501,10 +626,13 @@ var Playground = React.createFactory(React.createClass({
         }).then(result => {
             var data = JSON.parse(replaceAll("'x86_64' is not a recognized processor for this target (ignoring processor)", "", result));
             var compilerData = JSON.parse(data.compiler);
+            var location = compilerData.Errors.length != 0 ? Errors : Output;
             this.setState({                
                 results: data.program, 
                 compilerResults: compilerData,
-                requesting: false 
+                requesting: false,
+                showCompilerErrors: true,
+                resultsLocation: location
             });
         }); 
     },
